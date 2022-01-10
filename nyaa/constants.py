@@ -3,6 +3,7 @@
 BOT_CONFIG = "config\\bot.json"
 CONFIG_FILE = "config\\conf.json" # general config
 LEAVE_JOIN_CONFIG = "config\\leave_join.json"
+REACTION_ROLES_CONFIG = "config\\reaction_roles.json"
 RSS_CONFIG = "config\\rss.json"
 
 FFMPEG = "ffmpeg.exe"             # path to ffmpeg for music commands 

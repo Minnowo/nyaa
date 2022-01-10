@@ -18,7 +18,7 @@ class ServerUtil(commands.Cog):
     def __init__(self, bot) -> None:
         self.bot = bot
 
-    async def __error(self, ctx, error):
+    async def cog_command_error(self, ctx, error):
         """A local error handler for all errors arising from commands in this cog."""
         
         if isinstance(error, commands.NoPrivateMessage):

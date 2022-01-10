@@ -15,6 +15,7 @@ _config = {
                   "cog_server_util", # handles server utility commands 
                   "cog_sauce",       # handles sauce / hentai related commands 
                   "cog_user_join_message", # handles leave / join message
+                  "cog_reaction_roles", # handles reaction roles 
                   "cog_bot_events"   # handles bot ready event
                   ],
         "loaded_cogs" : { # contains cog instances 

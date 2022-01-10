@@ -1,5 +1,6 @@
 
 import os
+from . import regex
 
 def combine_dict(a, b):
     """Recursively combine the contents of 'b' into 'a'"""
@@ -116,3 +117,51 @@ def get_url_ext(url, includeDot = False):
     if includeDot:
         return "." + ext.lower().strip()
     return ext.lower().strip()
+
+
+def get_channel_id_from_string(channel_mention : str):
+    
+    m = regex.PARSE_CHANNEL_MENTION.search(channel_mention)
+        
+    if m:
+        id = parse_int(m.group(1))
+
+    else:
+        id = parse_int(channel_mention, None)
+
+        if not id:
+            return None 
+
+    return id 
+
+
+def get_mention_id_from_string(mention : str):
+    
+    m = regex.PARSE_USER_MENTION.search(mention)
+        
+    if m:
+        id = parse_int(m.group(1))
+
+    else:
+        id = parse_int(mention, None)
+
+        if not id:
+            return None 
+
+    return id 
+
+
+def get_role_mention_id_from_string(mention : str):
+    
+    m = regex.PARSE_ROLE_MENTION.search(mention)
+        
+    if m:
+        id = parse_int(m.group(1))
+
+    else:
+        id = parse_int(mention, None)
+
+        if not id:
+            return None 
+
+    return id 

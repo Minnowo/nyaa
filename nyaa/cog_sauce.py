@@ -16,7 +16,7 @@ class Sauce(commands.Cog):
 
     nyaa_cog = True
 
-    async def __error(self, ctx, error):
+    async def cog_command_error(self, ctx, error):
         """A local error handler for all errors arising from commands in this cog."""
         
         if isinstance(error, commands.NoPrivateMessage):
