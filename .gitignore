@@ -1,3 +1,10 @@
+# bot config files
+nyaa/config/
+nyaa/saves/
+nyaa/dls/
+nyaa/legacy/
+nyaa/ffmpeg.exe 
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
