@@ -50,6 +50,7 @@ class ReactionRoles(commands.Cog):
         
         print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+                  
 
 
     @commands.Cog.listener()
@@ -242,6 +243,73 @@ class ReactionRoles(commands.Cog):
             reaction, user = await self.bot.wait_for("reaction_add", check=check)
             data.remove(rr)
             self.reaction_roles_data[str(guild_id)] = data
+
+
+    @commands.command(name = "sync_reactions")
+    async def sync_reactions_(self, ctx, message_id : str = None, channel : str = None):
+
+        server_id = str(ctx.guild.id)
+
+        if server_id not in self.reaction_roles_data:
+            await ctx.send("this guild does not have any reaction roles")
+            return 
+
+        message_id = util.parse_int(message_id, None)
+
+        if not message_id:
+            await ctx.send("invalid message id")
+            return
+
+        if not channel:
+            channel = ctx.channel
+
+        else:
+            channel = util.get_channel_id_from_string(channel)
+            channel = ctx.guild.get_channel(channel)
+
+            if not channel:
+                await ctx.send("invalid channel")
+                return
+
+        try:
+            
+            message = await channel.fetch_message(message_id)
+
+        except:
+            await ctx.send("could not find message in the given channel")
+            return
+        
+        data = []
+        for reaction in message.reactions:
+            
+            # get the emote and all of the users who have reacted
+            data.append({
+                "emote" : str(reaction.emoji),
+                # filter out any bots we only want actualy people 
+                "users" : filter(lambda x : not x.bot, await reaction.users().flatten())
+            })
+        
+        # get only reaction roles for the server where the emote is found on the message 
+        for i in filter(lambda x : any(i["emote"] == x["emote"] for i in data), self.reaction_roles_data[server_id]):
+
+            role = ctx.guild.get_role(i["roleID"])
+            
+            if not role:
+                continue
+
+            # shitty nested loop but idc, you shouldn't really be using this command much its just something to use if the bot goes down
+            for ii in data:
+
+                if ii["emote"] == i["emote"]:
+
+                    for user in ii["users"]:
+
+                        if role not in user.roles:
+                            try:
+                                await user.add_roles(role, "reaction role")
+                            except Exception as e:
+                                print(e)
+
 
 
     def add_reaction(self, guild_id, emote, role_id, channel_id, message_id):
