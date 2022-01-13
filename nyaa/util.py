@@ -1,5 +1,6 @@
 
 import os
+import requests
 from . import regex
 
 def combine_dict(a, b):
@@ -165,3 +166,7 @@ def get_role_mention_id_from_string(mention : str):
             return None 
 
     return id 
+
+
+def get_nhentai_random():
+    return requests.get("https://nhentai.net/random").url

@@ -3,9 +3,11 @@ import traceback
 import sys
 import base64
 import discord
+from discord.errors import HTTPException
 
 from discord.ext import commands
 from discord.ext.commands.context import Context 
+import discord.ext.commands.errors
 
 from . import util
 from . import constants
@@ -51,28 +53,26 @@ class ServerUtil(commands.Cog):
 
 
     @commands.command(name='getuser', aliases=["getmember", "fetchuser", "user", "member"])
-    async def getuser_(self, ctx, *, id : discord.Member = None): 
+    async def getuser_(self, ctx, *, id : str = None): 
         
         if not id:
             await ctx.send("please specify a user or id")
             return 
 
-        if isinstance(id, str):
-            id = util.parse_int(id, None)
+        id = util.get_mention_id_from_string(id)
 
-            if id == None:
-                await ctx.send("invalid id, requires int")
-                return
+        if id is None:
+            await ctx.send("invalid id, requires int")
+            return
 
-        if isinstance(id, discord.Member):
-            member = id 
-
-        else:
-            try:
-                member = await self.bot.fetch_user(id)
-            except discord.errors.NotFound:
-                await ctx.send("user not found")
-                return
+        try:
+            member = await self.bot.fetch_user(id)
+        except HTTPException:
+            await ctx.send("there was an error making the request")
+            return
+        except (discord.errors.NotFound, discord.ext.commands.errors.MemberNotFound):
+            await ctx.send("user not found")
+            return
 
         embed = discord.Embed(color = constants.EMBED_COLOR)
         embed.set_author(name = f"{member.name}#{member.discriminator}", icon_url = member.avatar_url_as(size=128))

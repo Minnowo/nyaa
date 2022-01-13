@@ -9,6 +9,8 @@ RSS_CONFIG = "config\\rss.json"
 FFMPEG = "ffmpeg.exe"             # path to ffmpeg for music commands 
 
 DL_MUSIC = "dl\\music\\"
+DL_NHENTAI = "dl\\nhentai\\"
+NHENTAI_ARCHIVE = "config\\nhentai.7z"
 
 EMBED_COLOR = 0xBCD0F7            # default embed color
 EMBED_USER_LEFT_COLOR = 0xED152E  # color used for user leave embed
