@@ -2,8 +2,10 @@
 nyaa/config/
 nyaa/saves/
 nyaa/dls/
+nyaa/dl/
 nyaa/legacy/
 nyaa/ffmpeg.exe 
+nyaa/yt-dlp.exe 
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
