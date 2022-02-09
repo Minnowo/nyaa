@@ -30,7 +30,11 @@ class BotEvents(commands.Cog):
         
         print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
-    
+
+    # @commands.command(name='debug')
+    # async def debug_(self, ctx, *, search: str = None):
+    #     await ctx.send("~~test~~")
+
 
     @commands.Cog.listener()
     async def on_ready(self):

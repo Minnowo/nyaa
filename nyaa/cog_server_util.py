@@ -49,29 +49,29 @@ class ServerUtil(commands.Cog):
             await ctx.channel.purge(limit = amount + 1)
             return 
 
-        await ctx.send("no perms </3")
+        await ctx.send("I lack permission. ~~master pwease give me admin <3~~")
 
 
     @commands.command(name='getuser', aliases=["getmember", "fetchuser", "user", "member"])
     async def getuser_(self, ctx, *, id : str = None): 
         
-        if not id:
-            await ctx.send("please specify a user or id")
+        if id is None:
+            await ctx.send("Pwease specify a User or their ID <3")
             return 
 
         id = util.get_mention_id_from_string(id)
 
         if id is None:
-            await ctx.send("invalid id, requires int")
+            await ctx.send("Invalid ID or @")
             return
 
         try:
             member = await self.bot.fetch_user(id)
         except HTTPException:
-            await ctx.send("there was an error making the request")
+            await ctx.send("There was an error making the request")
             return
         except (discord.errors.NotFound, discord.ext.commands.errors.MemberNotFound):
-            await ctx.send("user not found")
+            await ctx.send("Could not find the user </3")
             return
 
         embed = discord.Embed(color = constants.EMBED_COLOR)
@@ -88,7 +88,7 @@ class ServerUtil(commands.Cog):
         if isinstance(id, str):
             id = util.parse_int(id)
 
-        if not id:
+        if id is None:
             guild = ctx.guild
 
         elif isinstance(id, discord.Guild):
@@ -97,8 +97,11 @@ class ServerUtil(commands.Cog):
         else:
             try:
                 guild = self.bot.get_guild(id)
-            except discord.errors.NotFound:
-                await ctx.send("guild not found")
+            except HTTPException:
+                await ctx.send("There was an error making the request")
+                return
+            except (discord.errors.NotFound, discord.ext.commands.errors.GuildNotFound):
+                await ctx.send("I'm not in this server </3")
                 return
 
         if not guild:

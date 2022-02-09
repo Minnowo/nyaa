@@ -47,13 +47,13 @@ class LeaveJoinMessage(commands.Cog):
 
         if isinstance(error, commands.NoPrivateMessage):
             try:
-                return await ctx.send('this command can not be used in Private Messages ;w;')
+                return await ctx.send('This command can not be used in Private Messages ;w;')
             except discord.HTTPException:
                 pass
 
         if isinstance(error, commands.MissingPermissions):
             try:
-                return await ctx.send("you are missing permissions to use this command >:3")
+                return await ctx.send("You are missing permissions to use this command >:3")
             except discord.HTTPException:
                 pass
         
@@ -111,7 +111,7 @@ class LeaveJoinMessage(commands.Cog):
     async def subscribe_(self, ctx, event : str = None, channel : str = None):
         
         if not event or event not in self.event_map:
-            await ctx.send(f"must specify the event to subscribe -> {constants.MEMBER_LEAVE}, {constants.MEMBER_JOIN}")
+            await ctx.send(f"Must specify the event to subscribe -> {constants.MEMBER_LEAVE}, {constants.MEMBER_JOIN}")
             return 
 
         server_id = str(ctx.guild.id)
@@ -121,7 +121,7 @@ class LeaveJoinMessage(commands.Cog):
 
         if not channel:
             self.event_map[event][server_id].add(ctx.channel.id)
-            await ctx.send("subscribed to the current channel")
+            await ctx.send("Subscribed to the current channel uwu")
             return
 
         # get the channel id from the mention string <#12345678>
@@ -134,17 +134,17 @@ class LeaveJoinMessage(commands.Cog):
             id = util.parse_int(channel, None)
 
             if not channel:
-                await ctx.send("invalid channel")
+                await ctx.send("Invalid channel")
                 return
 
         channel = ctx.guild.get_channel(id)
         
         if not channel:
-            await ctx.send(f"cannot find channel with given id: {id}")
+            await ctx.send(f"I cannot find channel with given id: {id}")
             return 
 
         self.event_map[event][server_id].add(channel.id)
-        await ctx.send(f"subscribed to the channel with the id: {id}")
+        await ctx.send(f"Subscribed to the channel with the id: {id}")
 
 
 
@@ -152,33 +152,33 @@ class LeaveJoinMessage(commands.Cog):
     async def unsubscribe_(self, ctx, event : str = None, channel : str = None):
         
         if not event or event not in self.event_map:
-            await ctx.send(f"must specify the event to subscribe -> {constants.MEMBER_LEAVE}, {constants.MEMBER_JOIN}")
+            await ctx.send(f"Must specify the event to subscribe -> {constants.MEMBER_LEAVE}, {constants.MEMBER_JOIN}")
             return 
 
         server_id = str(ctx.guild.id)
 
         if server_id not in self.event_map[event]:
-            await ctx.send("no event subscriptions for this server")
+            await ctx.send("There are no event subscriptions for this server")
             return 
 
         if not channel:
             self.event_map[event][server_id].remove(ctx.channel.id)
-            await ctx.send("unsubscribed from the current channel")
+            await ctx.send("Unsubscribed from the current channel uwo")
             return
 
         id = util.get_channel_id_from_string(channel)
         
         if not id:
-            await ctx.send("invalid channel")
+            await ctx.send("Invalid channel")
             return
 
         channel = ctx.guild.get_channel(id)
         
         if not channel:
-            await ctx.send(f"cannot find channel with given id: {id}")
+            await ctx.send(f"I cannot find channel with given id: {id}")
             return 
 
         self.event_map[event][server_id].remove(channel.id)
-        await ctx.send(f"unsubscribed from the channel with the id: {id}")
+        await ctx.send(f"Unsubscribed from the channel with the id: {id}")
 
     

@@ -38,13 +38,13 @@ class ReactionRoles(commands.Cog):
         
         if isinstance(error, commands.NoPrivateMessage):
             try:
-                return await ctx.send('this command can not be used in Private Messages ;w;')
+                return await ctx.send('This command can not be used in Private Messages ;w;')
             except discord.HTTPException:
                 pass
 
         if isinstance(error, commands.MissingPermissions):
             try:
-                return await ctx.send("you are missing permissions to use this command >:3")
+                return await ctx.send("You are missing permissions to use this command >:3")
             except discord.HTTPException:
                 pass
         
@@ -62,7 +62,7 @@ class ReactionRoles(commands.Cog):
             try:
                 await user.add_roles(role, reason="ReactionRole")
             except discord.errors.Forbidden:
-                await self.bot.get_channel(payload.channel_id).send("i do not have perms to give this role", delete_after = 5)
+                await self.bot.get_channel(payload.channel_id).send("I do not have perms to give this role", delete_after = 5)
 
 
     @commands.Cog.listener()
@@ -74,7 +74,7 @@ class ReactionRoles(commands.Cog):
             try:
                 await user.remove_roles(role, reason="ReactionRole")
             except discord.errors.Forbidden:
-                await self.bot.get_channel(payload.channel_id).send("i do not have perms to remove this role", delete_after = 5)
+                await self.bot.get_channel(payload.channel_id).send("I do not have perms to remove this role", delete_after = 5)
 
 
     @commands.command(name="embed")
@@ -105,7 +105,7 @@ class ReactionRoles(commands.Cog):
         try:
             args = parser.parse_args(shlex.split(message))
         except Exception:
-            await ctx.send("invalid input")
+            await ctx.send("Invalid input")
             return
 
         title = args.title or ""
@@ -136,33 +136,33 @@ class ReactionRoles(commands.Cog):
         mid = util.parse_int(message_id)
 
         if not mid:
-            await ctx.send("invalid message id")
+            await ctx.send("Invalid message id")
             return
         
         if not cid:
-            await ctx.send("invalid channel")
+            await ctx.send("Invalid channel")
             return
 
         if not rid:
-            await ctx.send("invalid role")
+            await ctx.send("Invalid role")
             return
 
         channel = ctx.guild.get_channel(cid)
         role = ctx.guild.get_role(rid)
 
         if not isinstance(channel, discord.TextChannel):
-            await ctx.send("text channel is required")
+            await ctx.send("Text channel is required")
             return 
 
         if not role:
-            await ctx.send("could not find role")
+            await ctx.send("Could not find role")
             return
 
         try:
             message = await channel.fetch_message(message_id)
             await message.add_reaction(emote)
         except Exception:
-            await ctx.send("could not get / react to message")
+            await ctx.send("Could not get / react to message")
             return
 
         self.add_reaction(ctx.guild.id, emote, role.id, channel.id, mid)
@@ -208,7 +208,7 @@ class ReactionRoles(commands.Cog):
         
         else:
             if index > len(data) :
-                await ctx.send("invalid index")
+                await ctx.send("Invalid index")
                 return
 
             embed.description = (
@@ -251,13 +251,13 @@ class ReactionRoles(commands.Cog):
         server_id = str(ctx.guild.id)
 
         if server_id not in self.reaction_roles_data:
-            await ctx.send("this guild does not have any reaction roles")
+            await ctx.send("This guild does not have any reaction roles")
             return 
 
         message_id = util.parse_int(message_id, None)
 
         if not message_id:
-            await ctx.send("invalid message id")
+            await ctx.send("Invalid message id")
             return
 
         if not channel:
@@ -268,7 +268,7 @@ class ReactionRoles(commands.Cog):
             channel = ctx.guild.get_channel(channel)
 
             if not channel:
-                await ctx.send("invalid channel")
+                await ctx.send("Invalid channel")
                 return
 
         try:
@@ -276,7 +276,7 @@ class ReactionRoles(commands.Cog):
             message = await channel.fetch_message(message_id)
 
         except:
-            await ctx.send("could not find message in the given channel")
+            await ctx.send("Could not find message in the given channel")
             return
         
         data = []
