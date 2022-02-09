@@ -116,7 +116,7 @@ class ServerUtil(commands.Cog):
 
         
     @commands.command(name = "encode64", aliases=['eb64', 'e64', 'base64encode', 'base64e'])
-    async def encode_base64_(ctx, *, string):
+    async def encode_base64_(self, ctx, *, string):
         string_bytes = string.encode("ascii")
         base64_bytes = base64.b64encode(string_bytes) 
         base64_string = base64_bytes.decode("ascii") 
@@ -132,7 +132,7 @@ class ServerUtil(commands.Cog):
             await ctx.send(msg2)
 
     @commands.command(name = "decode64", aliases=['db64', 'd64','base64decode', 'base64d'])
-    async def decode_base64_(ctx, *, string):
+    async def decode_base64_(self, ctx, *, string):
         string_bytes = string.encode("ascii")
         base64_bytes = base64.b64decode(string_bytes) 
         base64_string = base64_bytes.decode("ascii") 

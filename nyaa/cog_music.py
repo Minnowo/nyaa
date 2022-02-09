@@ -8,7 +8,6 @@ import requests
 import os 
 
 from discord.ext import commands
-from discord.ext.commands import has_permissions
 from async_timeout import timeout
 from functools import partial
 # from youtube_dl import YoutubeDL
@@ -270,8 +269,6 @@ class Music(commands.Cog):
             await ctx.invoke(self.connect_)
 
         player = self.get_player(ctx)
-
-        print(f"searching for: {search}")
 
         # If download is False, source will be a dict which will be used later to regather the stream.
         # If download is True, source will be a discord.FFmpegPCMAudio with a VolumeTransformer.
