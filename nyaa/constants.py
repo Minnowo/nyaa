@@ -27,8 +27,16 @@ KEMONOMIMI_KEY    = "kemonomimi"
 KEMONOMIMI_CONFIG = "config\\{0}\\{0}_line.txt".format(KEMONOMIMI_KEY)
 KEMONOMIMI_LINKS  = "config\\{0}\\{0}_urls.txt".format(KEMONOMIMI_KEY)
 
-SAUCE_LINES = [THIGH_CONFIG, FEET_CONFIG, CUTE_GIRLS_MOE_CONFIG, KEMONOMIMI_CONFIG]
-SAUCE_LINKS = [THIGH_LINKS , FEET_LINKS , CUTE_GIRLS_MOE_LINKS , KEMONOMIMI_LINKS ]
+APPLE_WORM_KEY    = "appleworm"
+APPLE_WORM_CONFIG = "config\\{0}\\{0}_line.txt".format(APPLE_WORM_KEY)
+APPLE_WORM_LINKS  = "config\\{0}\\{0}_urls.txt".format(APPLE_WORM_KEY)
+
+GURA_KEY    = "gura"
+GURA_CONFIG = "config\\{0}\\{0}_line.txt".format(GURA_KEY)
+GURA_LINKS  = "config\\{0}\\{0}_urls.txt".format(GURA_KEY)
+
+SAUCE_LINES = [THIGH_CONFIG, FEET_CONFIG, CUTE_GIRLS_MOE_CONFIG, KEMONOMIMI_CONFIG, APPLE_WORM_CONFIG, GURA_CONFIG]
+SAUCE_LINKS = [THIGH_LINKS , FEET_LINKS , CUTE_GIRLS_MOE_LINKS , KEMONOMIMI_LINKS , APPLE_WORM_LINKS , GURA_LINKS]
 ########################################################################
 ####################### exe / external runs ############################
 ########################################################################

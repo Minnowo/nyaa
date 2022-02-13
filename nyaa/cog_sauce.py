@@ -101,6 +101,14 @@ class Sauce(commands.Cog):
             return 
         await self._specific_sauce(ctx, constants.THIGH_LINKS, constants.THIGH_CONFIG, constants.THIGH_KEY) 
 
+    @commands.command(name = "worm", aliases=['appleworm'])
+    async def _worm(self, ctx):
+        await self._specific_sauce(ctx, constants.APPLE_WORM_LINKS, constants.APPLE_WORM_CONFIG, constants.APPLE_WORM_KEY) 
+
+    @commands.command(name = "gura", aliases=['gawr'])
+    async def _gura(self, ctx):
+        await self._specific_sauce(ctx, constants.GURA_LINKS, constants.GURA_CONFIG, constants.GURA_KEY) 
+
     @commands.command(name = "girl", aliases=['cutegirl'])
     async def _girl(self, ctx):
         await self._specific_sauce(ctx, constants.CUTE_GIRLS_MOE_LINKS, constants.CUTE_GIRLS_MOE_CONFIG, constants.CUTE_GIRLS_MOE_KEY) 
@@ -188,7 +196,11 @@ class Sauce(commands.Cog):
 
     @commands.command(name = "sauce_page")
     async def sauce_page_(self, ctx, sauce : str = None, page : str = None, use_api : str = None):
-        
+        if not ctx.channel.is_nsfw():
+            await self._bonk(ctx)
+            await ctx.send("This channel is not NSFW")
+            return 
+
         page = util.parse_int(page, None)
 
         if not page:
@@ -209,7 +221,11 @@ class Sauce(commands.Cog):
 
     @commands.command(name = "sauce_urls")
     async def sauce_urls_(self, ctx, sauce : str = None, limit : str = None, use_api : str = None):
-        
+        if not ctx.channel.is_nsfw():
+            await self._bonk(ctx)
+            await ctx.send("This channel is not NSFW")
+            return 
+
         if not ctx.guild:
             # not gonna allow this command in dms because of the server lock
             raise commands.NoPrivateMessage()
@@ -256,7 +272,11 @@ class Sauce(commands.Cog):
 
     @commands.command(name = "sauce")
     async def sauce_(self, ctx, sauce : str = None, use_api : str = None):
-        
+        if not ctx.channel.is_nsfw():
+            await self._bonk(ctx)
+            await ctx.send("This channel is not NSFW")
+            return 
+            
         metadata, url = await self.get_sauce_meta(sauce, use_api, False)
 
         if not metadata:

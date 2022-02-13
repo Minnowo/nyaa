@@ -80,6 +80,7 @@ class FileHandler():
 
             try:
                 with open(f"config\\{key}\\{key}_line.txt", "w") as writer:
+                    print(f"Saving line number for '{key}'")
                     writer.write(str(self.file_map[key]["line"]))
 
             except Exception as e:
