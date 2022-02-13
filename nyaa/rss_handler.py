@@ -13,7 +13,7 @@ class RSSHandler():
     channels = set()
 
     RE_DISCORD_LINK = compile(r"(https?://)?(cdn\.discordapp\.com)|(media\.discordapp\.net)/attachments/(\d+)/(\d+)/([^\s]+)")
-    MATCH_RE_DISCORD_LINK = compile(r"(https?://)?(?:cdn\.discordapp\.com)|(?:media\.discordapp\.net)/attachments/\d+/\d+/[^\s]+")
+    MATCH_RE_DISCORD_LINK = compile(r"(?:https?://)(?:(?:cdn\.discordapp\.com)|(?:media\.discordapp\.net))/attachments/\d+/\d+/[^\s]+")
 
     @staticmethod 
     def get_instance():
@@ -74,7 +74,7 @@ class RSSHandler():
         links = set()
         
         for i in self.MATCH_RE_DISCORD_LINK.findall(message.content):
-            links.add("https://" + i)
+            links.add(i)
 
         for i in message.attachments:
             links.add(i.url)

@@ -54,6 +54,8 @@ MEMBER_LEAVE = "leave"
 REACTION_CHANGED = "reaction_changed"
 MESSAGE_DELETED  = "message_deleted"
 
+JOKE_HELP = ["uwu", "owo", "*prrrr*", "nyaa~ ;3c", "*teehee*", "*prrrr*"]
+
 if __name__ == "__main__":
     import os 
 

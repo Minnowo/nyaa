@@ -55,6 +55,11 @@ class Sauce(commands.Cog):
         print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
 
+    async def image_embed(self, ctx, url):
+        embed = discord.Embed(color = constants.EMBED_COLOR)
+        embed.set_image(url = url)
+        await ctx.send(embed=embed)
+
     async def _specific_sauce(self, ctx, link, config, key):
 
         thigh = self.file_instance.file_map[key]
@@ -90,6 +95,10 @@ class Sauce(commands.Cog):
 
     @commands.command(name = "thighs", aliases=['thigh'])
     async def _thighs(self, ctx):
+        if not ctx.channel.is_nsfw():
+            await self._bonk(ctx)
+            await ctx.send("This channel is not NSFW")
+            return 
         await self._specific_sauce(ctx, constants.THIGH_LINKS, constants.THIGH_CONFIG, constants.THIGH_KEY) 
 
     @commands.command(name = "girl", aliases=['cutegirl'])
@@ -98,12 +107,31 @@ class Sauce(commands.Cog):
 
     @commands.command(name = "feet")
     async def _feet(self, ctx):
+        if not ctx.channel.is_nsfw():
+            await self._bonk(ctx)
+            await ctx.send("This channel is not NSFW")
+            return 
         await self._specific_sauce(ctx, constants.FEET_LINKS, constants.FEET_CONFIG, constants.FEET_KEY) 
 
     @commands.command(name = "kemo", aliases=['kemonomimi', 'neko'])
     async def _neko(self, ctx):
+        if not ctx.channel.is_nsfw():
+            await self._bonk(ctx)
+            await ctx.send("This channel is not NSFW")
+            return 
         await self._specific_sauce(ctx, constants.KEMONOMIMI_LINKS, constants.KEMONOMIMI_CONFIG, constants.KEMONOMIMI_KEY) 
 
+    @commands.command(name = "loli", aliases=['isloli'])
+    async def _isloli(self, ctx):
+        await self.image_embed(ctx, "https://cdn.discordapp.com/attachments/942174974754566204/942302273516748860/the_difference_between_loli_and_petite.png")
+
+    @commands.command(name = "awoo", aliases=['awooo'])
+    async def _awooo(self, ctx):
+        await self.image_embed(ctx, "https://cdn.discordapp.com/attachments/942174974754566204/942287252132859994/01101.jpg")
+        
+    @commands.command(name = "bonk")
+    async def _bonk(self, ctx):
+        await self.image_embed(ctx, "https://cdn.discordapp.com/attachments/942174974754566204/942293277485445160/02018.jpg")
 
     async def get_sauce_meta(self, sauce, use_api, full=False, limit=-1):
 

@@ -2,8 +2,9 @@
 import traceback
 import sys
 import discord
-
+import random
 from discord.ext import commands
+from . import constants
 
 class BotEvents(commands.Cog):
     """ events for the bot """
@@ -34,7 +35,11 @@ class BotEvents(commands.Cog):
     # @commands.command(name='debug')
     # async def debug_(self, ctx, *, search: str = None):
     #     await ctx.send("~~test~~")
+    
+    @commands.command(name='help')
+    async def help_(self, ctx, *, search: str = None):
 
+        await ctx.send(random.choice(constants.JOKE_HELP))
 
     @commands.Cog.listener()
     async def on_ready(self):
