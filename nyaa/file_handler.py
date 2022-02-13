@@ -79,12 +79,17 @@ class FileHandler():
         for key in self.file_map.keys():
 
             try:
-                if "open" in self.file_map[key]:
-                    if self.file_map[key]["open"]:
-                        self.file_map[key]["handle"].close()
-
                 with open(f"config\\{key}\\{key}_line.txt", "w") as writer:
                     writer.write(str(self.file_map[key]["line"]))
+
+            except Exception as e:
+                print(f"Could not save line number for '{key}' -> {e}")  
+
+            try:
+                if "open" in self.file_map[key]:
+                    if self.file_map[key]["open"]:
+                        if self.file_map[key]["handle"] is not None:
+                            self.file_map[key]["handle"].close()
 
             except Exception as e:
                 print(f"Could not unload links for '{key}' -> {e}")  

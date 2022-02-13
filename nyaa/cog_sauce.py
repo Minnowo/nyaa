@@ -59,8 +59,8 @@ class Sauce(commands.Cog):
 
         thigh = self.file_instance.file_map[key]
 
-        if not thigh["open"]:
-            await ctx.send("Thigh config could not be loaded.")
+        if not thigh["open"] or thigh["handle"] is None:
+            await ctx.send("Config could not be loaded.")
             return 
 
         url = thigh["handle"].readline()
@@ -78,13 +78,14 @@ class Sauce(commands.Cog):
             return 
 
         thigh["line"] = 0
-        thigh["file"].close()
+        thigh["handle"].close()
 
         try:
-            thigh["file"] = open(link)
+            thigh["handle"] = open(link)
             await self._specific_sauce(ctx, link, config, key)
         except:
-            thigh["file"] = None 
+            thigh["handle"] = None 
+            thigh["open"]   = False
 
 
     @commands.command(name = "thighs", aliases=['thigh'])
