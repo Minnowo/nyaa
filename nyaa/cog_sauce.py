@@ -16,12 +16,32 @@ from requests.utils import requote_uri
 
 from . import constants
 from . import util 
+from . import file_handler
 
 class Sauce(commands.Cog):
     """ """
 
+    thigh_file  = {"line" : 0, "file" : None }
     server_lock = {}
+
+    file_instance = None 
+
     nyaa_cog = True
+
+    def __init__(self, bot):
+        
+        self.file_instance = file_handler.FileHandler.get_instance()
+        self.file_instance.init_file_handles()
+        
+    def _save_file(self, file, key):
+        try:
+            print(f"Saving '{key}' line count: {str(self.file_instance.file_map[key]['line'])}")
+
+            with open(file, "w")  as writer:
+                writer.write(str(self.file_instance.file_map[key]["line"]))
+
+        except Exception as e :
+            print(f"Cannot save '{key}'-> {e}")
 
     async def cog_command_error(self, ctx, error):
         """A local error handler for all errors arising from commands in this cog."""
@@ -34,6 +54,55 @@ class Sauce(commands.Cog):
 
         print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+
+    async def _specific_sauce(self, ctx, link, config, key):
+
+        thigh = self.file_instance.file_map[key]
+
+        if not thigh["open"]:
+            await ctx.send("Thigh config could not be loaded.")
+            return 
+
+        url = thigh["handle"].readline()
+
+        if url:
+            thigh["line"] += 1
+
+            embed = discord.Embed(color = constants.EMBED_COLOR)
+            embed.set_image(url = url)
+            await ctx.send(embed=embed)
+
+            if thigh["line"] % 10 == 0:
+                self._save_file(config, key)
+
+            return 
+
+        thigh["line"] = 0
+        thigh["file"].close()
+
+        try:
+            thigh["file"] = open(link)
+            await self._specific_sauce(ctx, link, config, key)
+        except:
+            thigh["file"] = None 
+
+
+    @commands.command(name = "thighs", aliases=['thigh'])
+    async def _thighs(self, ctx):
+        await self._specific_sauce(ctx, constants.THIGH_LINKS, constants.THIGH_CONFIG, constants.THIGH_KEY) 
+
+    @commands.command(name = "girl", aliases=['cutegirl'])
+    async def _girl(self, ctx):
+        await self._specific_sauce(ctx, constants.CUTE_GIRLS_MOE_LINKS, constants.CUTE_GIRLS_MOE_CONFIG, constants.CUTE_GIRLS_MOE_KEY) 
+
+    @commands.command(name = "feet")
+    async def _feet(self, ctx):
+        await self._specific_sauce(ctx, constants.FEET_LINKS, constants.FEET_CONFIG, constants.FEET_KEY) 
+
+    @commands.command(name = "kemo", aliases=['kemonomimi', 'neko'])
+    async def _neko(self, ctx):
+        await self._specific_sauce(ctx, constants.KEMONOMIMI_LINKS, constants.KEMONOMIMI_CONFIG, constants.KEMONOMIMI_KEY) 
+
 
     async def get_sauce_meta(self, sauce, use_api, full=False, limit=-1):
 

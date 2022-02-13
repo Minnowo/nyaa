@@ -1,6 +1,6 @@
 
 import discord
-
+from re import compile
 
 class RSSHandler():
     
@@ -11,6 +11,9 @@ class RSSHandler():
     }
 
     channels = set()
+
+    RE_DISCORD_LINK = compile(r"(https?://)?(cdn\.discordapp\.com)|(media\.discordapp\.net)/attachments/(\d+)/(\d+)/([^\s]+)")
+    MATCH_RE_DISCORD_LINK = compile(r"(https?://)?(?:cdn\.discordapp\.com)|(?:media\.discordapp\.net)/attachments/\d+/\d+/[^\s]+")
 
     @staticmethod 
     def get_instance():
@@ -55,7 +58,7 @@ class RSSHandler():
             
     def handle_discord_message(self, message : discord.message):
 
-        if not message.guild or not message.author.bot:
+        if not message.guild:
             return
 
         i_server_id = message.guild.id
@@ -68,5 +71,20 @@ class RSSHandler():
         if channel_id not in self.rss_channel_map[s_server_id]:
             return
 
-        print("message recieved for channel")
+        links = set()
+        
+        for i in self.MATCH_RE_DISCORD_LINK.findall(message.content):
+            links.add("https://" + i)
+
+        for i in message.attachments:
+            links.add(i.url)
+
+        if links:
+            with open("config\\links.txt", "a") as writer:
+                
+                for i in links:
+                    print("adding " + i)    
+                    writer.write(i.strip() + "\n")
+
+        # print("message recieved for channel")
 

@@ -16,6 +16,7 @@ from . import threaded_queue
 from . import cog_user_join_message
 from . import cog_reaction_roles
 from . import rss_handler
+from . import file_handler
 
 def get_cog_classes(name):
     """gets all cog classes"""
@@ -36,7 +37,6 @@ def load_configs():
     # config.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), "config", "doujin_cache.json"), "doujin_cache")
     config.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), constants.RSS_CONFIG), conf = rss_handler.RSSHandler.rss_channel_map)
     config.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), constants.LEAVE_JOIN_CONFIG), conf = cog_user_join_message.LeaveJoinMessage.event_map)
-    config.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), constants.REACTION_ROLES_CONFIG), conf = cog_reaction_roles.ReactionRoles.reaction_roles_data)
 
     util.replace_list_set(rss_handler.RSSHandler.rss_channel_map)
     util.replace_list_set(cog_user_join_message.LeaveJoinMessage.event_map)
@@ -47,6 +47,7 @@ def save_configs():
     config.save(os.path.join(os.path.dirname(os.path.abspath(__file__)), constants.RSS_CONFIG), conf = rss_handler.RSSHandler.rss_channel_map)
     config.save(os.path.join(os.path.dirname(os.path.abspath(__file__)), constants.LEAVE_JOIN_CONFIG), conf = cog_user_join_message.LeaveJoinMessage.event_map)
     config.save(os.path.join(os.path.dirname(os.path.abspath(__file__)), constants.REACTION_ROLES_CONFIG), conf = cog_reaction_roles.ReactionRoles.reaction_roles_data)
+    config.save(os.path.join(os.path.dirname(os.path.abspath(__file__)), constants.THIGH_CONFIG), conf = cog_reaction_roles.ReactionRoles.reaction_roles_data)
 
 def main():
     
@@ -85,4 +86,8 @@ def main():
         print("ending thread:", name)
         thread.cleanup()
 
+    print("saving configs")
     save_configs()
+
+    print("closing file handles")
+    file_handler.FileHandler.get_instance().deinit_file_handles()
