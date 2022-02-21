@@ -30,7 +30,9 @@ class LeaveJoinMessage(commands.Cog):
     def __init__(self, bot) -> None:
         self.bot = bot
 
-
+    def __del__(self):
+        pass 
+    
     async def cog_check(self, ctx):
         """A local check which applies to all commands in this cog."""
 

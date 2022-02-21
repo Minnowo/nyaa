@@ -11,32 +11,85 @@ RSS_CONFIG            = "config\\rss.json"                             # contain
 ########################################################################
 ####################### sauce command url files ########################
 ########################################################################
-THIGH_KEY      = "thighs"
-THIGH_CONFIG   = "config\\{0}\\{0}_line.txt".format(THIGH_KEY)
-THIGH_LINKS    = "config\\{0}\\{0}_urls.txt".format(THIGH_KEY)
 
-FEET_KEY      = "feet"
-FEET_CONFIG   = "config\\{0}\\{0}_line.txt".format(FEET_KEY)
-FEET_LINKS    = "config\\{0}\\{0}_urls.txt".format(FEET_KEY)
+CONFIG_FORMAT = "config\\sauce\\{0}\\{0}_line.txt"
+LINKS_FORMAT = "config\\sauce\\{0}\\{0}_links.txt"
 
-CUTE_GIRLS_MOE_KEY    = "cutegirls"
-CUTE_GIRLS_MOE_CONFIG = "config\\{0}\\{0}_line.txt".format(CUTE_GIRLS_MOE_KEY)
-CUTE_GIRLS_MOE_LINKS  = "config\\{0}\\{0}_urls.txt".format(CUTE_GIRLS_MOE_KEY)
+SAUCE_MAP = {
+    "thighs" : {
+        "config" : CONFIG_FORMAT.format("thighs"),
+        "links" : LINKS_FORMAT.format("thighs")
+    },
+    "feet" : {
+        "config" :  CONFIG_FORMAT.format("feet"),
+        "links" : LINKS_FORMAT.format("feet")
+    },
+    "cutegirls" : {
+        "config" : CONFIG_FORMAT.format("cutegirls"),
+        "links" : LINKS_FORMAT.format("cutegirls")
+    },
+    "kemonomimi" : {
+        "config" : CONFIG_FORMAT.format("kemonomimi"),
+        "links" : LINKS_FORMAT.format("kemonomimi")
+    },
+    "appleworm" : {
+        "config" : CONFIG_FORMAT.format("appleworm"),
+        "links" : LINKS_FORMAT.format("appleworm")
+    },
+    "gura" : {
+        "config" : CONFIG_FORMAT.format("gura"),
+        "links" : LINKS_FORMAT.format("gura")
+    },
+    "femboy" : {
+        "config" : CONFIG_FORMAT.format("femboy"),
+        "links" : LINKS_FORMAT.format("femboy")
+    },
+    "bondage" : {
+        "config" : CONFIG_FORMAT.format("bondage"),
+        "links" : LINKS_FORMAT.format("bondage")
+    },
+    "witch" : {
+        "config" : CONFIG_FORMAT.format("witch"),
+        "links" : LINKS_FORMAT.format("witch")
+    },
+    "hutao" : {
+        "config" : CONFIG_FORMAT.format("hutao"),
+        "links" : LINKS_FORMAT.format("hutao")
+    },
+    "rushia" : {
+        "config" : CONFIG_FORMAT.format("rushia"),
+        "links" : LINKS_FORMAT.format("rushia")
+    },
+    "fubuki" : {
+        "config" : CONFIG_FORMAT.format("fubuki"),
+        "links" : LINKS_FORMAT.format("fubuki")
+    },
+    "okayu" : {
+        "config" : CONFIG_FORMAT.format("okayu"),
+        "links" : LINKS_FORMAT.format("okayu")
+    },
+    "pekora" : {
+        "config" : CONFIG_FORMAT.format("pekora"),
+        "links" : LINKS_FORMAT.format("pekora")
+    },
+    "mori" : {
+        "config" : CONFIG_FORMAT.format("mori"),
+        "links" : LINKS_FORMAT.format("mori")
+    },
+    "suisei" : {
+        "config" : CONFIG_FORMAT.format("suisei"),
+        "links" : LINKS_FORMAT.format("suisei")
+    },
+    "navel" : {
+        "config" : CONFIG_FORMAT.format("navel"),
+        "links" : LINKS_FORMAT.format("navel")
+    },
+    "panties" : {
+        "config" : CONFIG_FORMAT.format("panties"),
+        "links" : LINKS_FORMAT.format("panties")
+    }
+}
 
-KEMONOMIMI_KEY    = "kemonomimi"
-KEMONOMIMI_CONFIG = "config\\{0}\\{0}_line.txt".format(KEMONOMIMI_KEY)
-KEMONOMIMI_LINKS  = "config\\{0}\\{0}_urls.txt".format(KEMONOMIMI_KEY)
-
-APPLE_WORM_KEY    = "appleworm"
-APPLE_WORM_CONFIG = "config\\{0}\\{0}_line.txt".format(APPLE_WORM_KEY)
-APPLE_WORM_LINKS  = "config\\{0}\\{0}_urls.txt".format(APPLE_WORM_KEY)
-
-GURA_KEY    = "gura"
-GURA_CONFIG = "config\\{0}\\{0}_line.txt".format(GURA_KEY)
-GURA_LINKS  = "config\\{0}\\{0}_urls.txt".format(GURA_KEY)
-
-SAUCE_LINES = [THIGH_CONFIG, FEET_CONFIG, CUTE_GIRLS_MOE_CONFIG, KEMONOMIMI_CONFIG, APPLE_WORM_CONFIG, GURA_CONFIG]
-SAUCE_LINKS = [THIGH_LINKS , FEET_LINKS , CUTE_GIRLS_MOE_LINKS , KEMONOMIMI_LINKS , APPLE_WORM_LINKS , GURA_LINKS]
 ########################################################################
 ####################### exe / external runs ############################
 ########################################################################
@@ -70,17 +123,15 @@ if __name__ == "__main__":
     os.makedirs(DL_MUSIC, exist_ok=True)
     os.makedirs(DL_NHENTAI, exist_ok=True)
 
-    for i in SAUCE_LINES:
-        os.makedirs(os.path.dirname(i), exist_ok=True)
+    for i in SAUCE_MAP:
+        print(i)
+        
+        os.makedirs(os.path.dirname(CONFIG_FORMAT.format(i)), exist_ok=True)
 
-        if not os.path.isfile(i):
-            with open(i, "w") as writer:
+        if not os.path.isfile(SAUCE_MAP[i]["config"]):
+            with open(SAUCE_MAP[i]["config"], "w") as writer:
                 writer.write("")
 
-    for i in SAUCE_LINKS:
-
-            if not os.path.isfile(i):
-                with open(i, "w") as writer:
-                    writer.write("")
-
-    
+        if not os.path.isfile(SAUCE_MAP[i]["links"]):
+            with open(SAUCE_MAP[i]["links"], "w") as writer:
+                writer.write("")

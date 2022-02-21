@@ -9,39 +9,32 @@ from discord import embeds
 import requests
 import os 
 import hentai_dl
+import random 
 
 from discord.ext import commands
 from discord.ext.commands import has_permissions
 from requests.utils import requote_uri
 
 from . import constants
+from . import constant_media
 from . import util 
-from . import file_handler
 
 class Sauce(commands.Cog):
     """ """
 
-    thigh_file  = {"line" : 0, "file" : None }
     server_lock = {}
 
     file_instance = None 
 
     nyaa_cog = True
 
+    def __del__(self):
+        pass 
+    
     def __init__(self, bot):
         
-        self.file_instance = file_handler.FileHandler.get_instance()
-        self.file_instance.init_file_handles()
-        
-    def _save_file(self, file, key):
-        try:
-            print(f"Saving '{key}' line count: {str(self.file_instance.file_map[key]['line'])}")
-
-            with open(file, "w")  as writer:
-                writer.write(str(self.file_instance.file_map[key]["line"]))
-
-        except Exception as e :
-            print(f"Cannot save '{key}'-> {e}")
+        self.bot = bot 
+    
 
     async def cog_command_error(self, ctx, error):
         """A local error handler for all errors arising from commands in this cog."""
@@ -60,87 +53,7 @@ class Sauce(commands.Cog):
         embed.set_image(url = url)
         await ctx.send(embed=embed)
 
-    async def _specific_sauce(self, ctx, link, config, key):
-
-        thigh = self.file_instance.file_map[key]
-
-        if not thigh["open"] or thigh["handle"] is None:
-            await ctx.send("Config could not be loaded.")
-            return 
-
-        url = thigh["handle"].readline()
-
-        if url:
-            thigh["line"] += 1
-
-            embed = discord.Embed(color = constants.EMBED_COLOR)
-            embed.set_image(url = url)
-            await ctx.send(embed=embed)
-
-            if thigh["line"] % 10 == 0:
-                self._save_file(config, key)
-
-            return 
-
-        thigh["line"] = 0
-        thigh["handle"].close()
-
-        try:
-            thigh["handle"] = open(link)
-            await self._specific_sauce(ctx, link, config, key)
-        except:
-            thigh["handle"] = None 
-            thigh["open"]   = False
-
-
-    @commands.command(name = "thighs", aliases=['thigh'])
-    async def _thighs(self, ctx):
-        if not ctx.channel.is_nsfw():
-            await self._bonk(ctx)
-            await ctx.send("This channel is not NSFW")
-            return 
-        await self._specific_sauce(ctx, constants.THIGH_LINKS, constants.THIGH_CONFIG, constants.THIGH_KEY) 
-
-    @commands.command(name = "worm", aliases=['appleworm'])
-    async def _worm(self, ctx):
-        await self._specific_sauce(ctx, constants.APPLE_WORM_LINKS, constants.APPLE_WORM_CONFIG, constants.APPLE_WORM_KEY) 
-
-    @commands.command(name = "gura", aliases=['gawr'])
-    async def _gura(self, ctx):
-        await self._specific_sauce(ctx, constants.GURA_LINKS, constants.GURA_CONFIG, constants.GURA_KEY) 
-
-    @commands.command(name = "girl", aliases=['cutegirl'])
-    async def _girl(self, ctx):
-        await self._specific_sauce(ctx, constants.CUTE_GIRLS_MOE_LINKS, constants.CUTE_GIRLS_MOE_CONFIG, constants.CUTE_GIRLS_MOE_KEY) 
-
-    @commands.command(name = "feet")
-    async def _feet(self, ctx):
-        if not ctx.channel.is_nsfw():
-            await self._bonk(ctx)
-            await ctx.send("This channel is not NSFW")
-            return 
-        await self._specific_sauce(ctx, constants.FEET_LINKS, constants.FEET_CONFIG, constants.FEET_KEY) 
-
-    @commands.command(name = "kemo", aliases=['kemonomimi', 'neko'])
-    async def _neko(self, ctx):
-        if not ctx.channel.is_nsfw():
-            await self._bonk(ctx)
-            await ctx.send("This channel is not NSFW")
-            return 
-        await self._specific_sauce(ctx, constants.KEMONOMIMI_LINKS, constants.KEMONOMIMI_CONFIG, constants.KEMONOMIMI_KEY) 
-
-    @commands.command(name = "loli", aliases=['isloli'])
-    async def _isloli(self, ctx):
-        await self.image_embed(ctx, "https://cdn.discordapp.com/attachments/942174974754566204/942302273516748860/the_difference_between_loli_and_petite.png")
-
-    @commands.command(name = "awoo", aliases=['awooo'])
-    async def _awooo(self, ctx):
-        await self.image_embed(ctx, "https://cdn.discordapp.com/attachments/942174974754566204/942287252132859994/01101.jpg")
-        
-    @commands.command(name = "bonk")
-    async def _bonk(self, ctx):
-        await self.image_embed(ctx, "https://cdn.discordapp.com/attachments/942174974754566204/942293277485445160/02018.jpg")
-
+    
     async def get_sauce_meta(self, sauce, use_api, full=False, limit=-1):
 
         if not use_api or use_api.lower() in ("true","yes","y","t","1","+"):

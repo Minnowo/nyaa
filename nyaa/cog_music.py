@@ -191,6 +191,9 @@ class Music(commands.Cog):
         self.bot = bot
         self.players = {}
 
+    def __del__(self):
+        pass 
+
     async def cleanup(self, guild):
         try:
             await guild.voice_client.disconnect()

@@ -3,6 +3,7 @@ import traceback
 import sys
 import base64
 import discord
+import random
 from discord.errors import HTTPException
 
 from discord.ext import commands
@@ -20,6 +21,9 @@ class ServerUtil(commands.Cog):
     def __init__(self, bot) -> None:
         self.bot = bot
 
+    def __del__(self):
+        pass 
+    
     async def cog_command_error(self, ctx, error):
         """A local error handler for all errors arising from commands in this cog."""
         
@@ -37,6 +41,22 @@ class ServerUtil(commands.Cog):
     async def invite_(self, ctx): 
         await ctx.send(f"https://discord.com/oauth2/authorize?client_id={self.bot.user.id}&permissions=8&scope=bot")
 
+
+    @commands.command(name='random', aliases=["rand", "rnd"])
+    async def random_(self, ctx, a : str, b : str): 
+        
+        a = util.parse_int(a, None)
+        b = util.parse_int(b, None)
+
+        if not a or not b:
+            await ctx.send("Please enter a min and max number")
+            return 
+
+        if a > b:
+            await ctx.send(str(random.randint(b, a)))
+            return 
+            
+        await ctx.send(str(random.randint(a, b)))
 
     @commands.command(name='clear', aliases=["delete", "purge"])
     async def clear_(self, ctx : Context, amount = 5): 

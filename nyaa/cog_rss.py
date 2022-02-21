@@ -24,6 +24,9 @@ class RSS(commands.Cog):
         threaded_queue.active_threads["rss"] = self.worker_queue
 
 
+    def __del__(self):
+        pass 
+    
     async def cog_check(self, ctx):
         """A local check which applies to all commands in this cog."""
         

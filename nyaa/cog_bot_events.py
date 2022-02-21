@@ -14,6 +14,9 @@ class BotEvents(commands.Cog):
     def __init__(self, bot) -> None:
         self.bot = bot
 
+    def __del__(self):
+        pass 
+    
     async def __local_check(self, ctx):
         """A local check which applies to all commands in this cog."""
         if not ctx.guild:
