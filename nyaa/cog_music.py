@@ -1,5 +1,4 @@
 import itertools
-import subprocess
 import traceback
 import discord
 import asyncio
@@ -10,8 +9,9 @@ import os
 from discord.ext import commands
 from async_timeout import timeout
 from functools import partial
-# from youtube_dl import YoutubeDL
 
+# YoutubbDL is bad compared to yt_dlp which can play nsfw content
+# from youtube_dl import YoutubeDL
 from yt_dlp import YoutubeDL
 
 from . import constants 

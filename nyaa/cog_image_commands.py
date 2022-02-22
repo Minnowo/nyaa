@@ -1,27 +1,18 @@
 
-from ast import alias
-import itertools
-from posixpath import abspath
-import traceback
 import discord
-import asyncio
-import sys
-from discord import embeds 
-import requests
 import os 
-import hentai_dl
 import random 
 import json 
+import traceback
+import sys
 
 from discord.ext import commands
-from discord.ext.commands import has_permissions
-from requests.utils import requote_uri
 
 from . import constants
 from . import constant_media
 from . import util 
 
-
+# constants used
 CONFIG_FORMAT = "config\\sauce\\{0}\\{0}_lines.json"
 LINKS_SFW_FORMAT = "config\\sauce\\{0}\\{0}_links_sfw.txt"
 LINKS_NSFW_FORMAT = "config\\sauce\\{0}\\{0}_links_nsfw.txt"
@@ -33,22 +24,26 @@ MODULES = ["appleworm", "bondage", "cutegirls", "feet", "femboy", "fubuki", "gur
 
 SAUCE_MAP = { }
 
+# cog responsible for handling image commands 
 class ImageCommands(commands.Cog):
-    """ """
 
-    nyaa_cog = True
+    # lets the __init__.py identify this as a cog 
+    nyaa_cog = True 
     
 
+    # on delete save all configs 
     def __del__(self):
         
         for i in SAUCE_MAP:
 
+            # close all open file handles 
             for ii in SAUCE_MAP[i]["handles"]:
 
                 if SAUCE_MAP[i]["handles"][ii] is not None:
                     SAUCE_MAP[i]["handles"][ii].close()
 
             try:
+                # write config for the module
                 with open(SAUCE_MAP[i]["paths"]["config"], "w") as writer:
                     json.dump(SAUCE_MAP[i]["config"], writer, indent=5)
 
@@ -62,6 +57,7 @@ class ImageCommands(commands.Cog):
         
         self.bot = bot 
 
+        # lambda only used here 
         def write_file(filename, text):
             
             if isinstance(text, dict):
@@ -85,24 +81,26 @@ class ImageCommands(commands.Cog):
             except:
                 return None 
 
+        # build the SAUCE_MAP 
         for i in MODULES:
 
             config_path     = CONFIG_FORMAT.format(i)
             links_sfw_path  = LINKS_SFW_FORMAT.format(i)
             links_nsfw_path = LINKS_NSFW_FORMAT.format(i)
 
-            SAUCE_MAP[i] = {}
-            SAUCE_MAP[i]["paths"] = {}
-            SAUCE_MAP[i]["paths"]["config"]      = config_path
-            SAUCE_MAP[i]["paths"]["links-sfw"]   = links_sfw_path
-            SAUCE_MAP[i]["paths"]["links-nsfw"]  = links_nsfw_path
+            SAUCE_MAP[i] = {}                                         # create new dict for module 
+            SAUCE_MAP[i]["paths"] = {}                                # create path sub dict
+            SAUCE_MAP[i]["paths"]["config"]      = config_path        # set config path
+            SAUCE_MAP[i]["paths"]["links-sfw"]   = links_sfw_path     # set sfw links path
+            SAUCE_MAP[i]["paths"]["links-nsfw"]  = links_nsfw_path    # set nsfw links path
 
             SAUCE_MAP[i]["handles"] = {}           # file handles
             SAUCE_MAP[i]["handles"]["sfw"] = None  # sfw links
             SAUCE_MAP[i]["handles"]["nsfw"] = None # nsfw links
 
-            SAUCE_MAP[i]["config"] = {"nsfw" : 0, "sfw" : 0 }
+            SAUCE_MAP[i]["config"] = {"nsfw" : 0, "sfw" : 0 }   # default config
 
+            # if not module config folder exists create all files and continue 
             if not os.path.isdir(os.path.dirname(config_path)):
                 
                 os.makedirs(os.path.dirname(config_path), exist_ok=True)
@@ -112,64 +110,85 @@ class ImageCommands(commands.Cog):
                 write_file(links_nsfw_path, "\n" + LINK_FILE_END)
                 continue
             
-
+            # no config found write default 
             if not os.path.isfile(config_path):
                 write_file(config_path, SAUCE_MAP[i]["config"])
 
+            # read existing config 
             else:
                 SAUCE_MAP[i]["config"] = load_config(config_path)
 
 
+            # no sfw links file found, write default
             if not os.path.isfile(links_sfw_path):
                 write_file(links_sfw_path , "\n" + LINK_FILE_END)
 
+            # set file handle for existing sfw links
             else:
                 handle = load_link_file(links_sfw_path) 
                 
                 if handle is not None:
-
+                    
+                    # seek to the line saved in the config  (1 url per line)
                     for ii in range(SAUCE_MAP[i]["config"]["sfw"]):
                         line = handle.readline().strip()
                         
+                        # end of file, seek to start
                         if line == LINK_FILE_END:
                             SAUCE_MAP[i]["config"]["sfw"] = 0
                             handle.seek(0)
                             break 
-                        
+                    
+                    # set the handle
                     SAUCE_MAP[i]["handles"]["sfw"] = handle
 
 
+            # no nsfw links file found, write default
             if not os.path.isfile(links_nsfw_path):
                 write_file(links_nsfw_path , "\n" + LINK_FILE_END)
 
+            # set file handles for existing nsfw links
             else:
                 
                 handle = load_link_file(links_nsfw_path) 
                 
                 if handle is not None:
-
+                    
+                    # seek to line saved in config
                     for ii in range(SAUCE_MAP[i]["config"]["nsfw"]):
                         line = handle.readline().strip()
 
+                        # end of file, seek to start
                         if line == LINK_FILE_END:
                             SAUCE_MAP[i]["config"]["nsfw"] = 0
                             handle.seek(0)
                             break 
-                        
+                    
+                    # set the handle
                     SAUCE_MAP[i]["handles"]["nsfw"] = handle
 
 
     async def cog_command_error(self, ctx, error):
         """A local error handler for all errors arising from commands in this cog."""
         
+        # if any commands raise NoPrivateMessage error, it will be delt with here 
         if isinstance(error, commands.NoPrivateMessage):
             try:
                 return await ctx.send('This command can not be used in Private Messages.')
             except discord.HTTPException:
                 pass
 
-    def get_url(self, handle, conf, config_key, retries = 5):
+        print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
+        traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
 
+    # used to read a new url from the given file
+    def get_url(self, handle, conf, config_key, retries = 5):
+        """ 
+            handle     : the open file handle
+            conf       : config dict for the file (contains line number for each file)
+            config_key : the key to be used in the config to access the correct file numbers
+            retries    : the number of tries until assuming bad config 
+        """
         tries = 0
         lines = 0
 
@@ -180,11 +199,14 @@ class ImageCommands(commands.Cog):
                 lines += 1
                 tries += 1
 
+                # read a line from the file
                 line = handle.readline().strip()
 
+                # is http url, return it
                 if line.startswith("http"):
                     return line 
 
+                # end of file, reset to line 1 and keep trying
                 if line == LINK_FILE_END:
                     lines = 0
                     handle.seek(0)
@@ -193,85 +215,142 @@ class ImageCommands(commands.Cog):
             return None 
 
         finally:
-            
+            # update the line number in the config
             conf["config"][config_key] += lines 
 
+
+
+    # sends and iamge embed 
     async def send_image_embed(self, ctx, url):
+        """sends a discord emebd with an image set to the given url"""
         embed = discord.Embed(color = constants.EMBED_COLOR)
         embed.set_image(url = url)
         await ctx.send(embed=embed)
 
-    async def handle_nsfw(self, ctx, mod):
 
+    # handles the nsfw link file and sending content from it 
+    async def handle_nsfw(self, ctx, mod):
+        """mod is the module dict stored in SAUCE_MAP"""
+
+        # check file handle
         if mod["handles"]["nsfw"] is None:
             await ctx.send("Could not load config file.")
             return 
 
+        # try and get a url
         url = self.get_url(mod["handles"]["nsfw"], mod, "nsfw")
 
+        # could not read link from file
         if url is None:
             await ctx.send("There is no media for channel type NSFW.")
             return 
         
+        # url found, send image
         await self.send_image_embed(ctx, url) 
 
-    async def handle_sfw(self, ctx, mod):
 
+
+    # handles the nsfw link file and sending content from it
+    async def handle_sfw(self, ctx, mod):
+        """mod is the module dict stored in SAUCE_MAP"""
+
+        # check file handle
         if mod["handles"]["sfw"] is None:
             await ctx.send("Could not load config file.")
             return 
 
+        # try and get a url
         url = self.get_url(mod["handles"]["sfw"], mod, "sfw")
         
+        # could not read link from file
         if url is None:
             await ctx.send("There is no media for channel type SFW.")
             return 
         
+        # url found, send image
         await self.send_image_embed(ctx, url)
 
-    async def image_embed(self, ctx, key, requested_type = None):
 
-        mod = SAUCE_MAP[key]
+
+
+    # handles sending content for sfw and nsfw channels
+    async def image_embed(self, ctx, key, requested_type = None):
+        """
+        key is the module name
+        requested_type is the content type prefered 
+        """
+
+        # get module from config 
+        mod = SAUCE_MAP.get(key, None)
         isNSFW = ctx.channel.is_nsfw()
 
+        # check for bad config 
+        if mod is None:
+            print(f"Could not find module with name of '{key}'")
+            await ctx.send("There has been an unexpected error.")
+            return  
+
+        # if there is a requested content type, deal with it
         if requested_type is not None:
             
+            # wants nsfw content 
             if requested_type == "nsfw":
                 
+                # if the channel is sfw, do not send anything
                 if not isNSFW:
                     await ctx.send("NSFW channel is required for NSFW content.")
                     return 
 
+                # wants nsfw content in nsfw channel, all good send it 
                 await self.handle_nsfw(ctx, mod)
                 return 
 
+            # wants sfw content 
             elif requested_type == "sfw":
+
+                # no need for checks sfw can go anywhere 
                 await self.handle_sfw(ctx, mod)
                 return 
                 
 
+        # no content requested, send nsfw content for nsfw channel
         if isNSFW:
             await self.handle_nsfw(ctx, mod)
             return 
 
+        # sfw channel send sfw content 
         await self.handle_sfw(ctx, mod)
         
 
-
+    # fun / informative commands with little content stored in constant_media.py
     @commands.command(name = "loli", aliases=['isloli'])
     async def _isloli(self, ctx):
-        await self.send_image_embed(ctx, "https://cdn.discordapp.com/attachments/942174974754566204/942302273516748860/the_difference_between_loli_and_petite.png")
+        # send loli diagram
+        await self.send_image_embed(ctx, constant_media.DIF_BETWEEN_LOLI_AND_SMOL)
 
     @commands.command(name = "awoo", aliases=['awooo'])
     async def _awooo(self, ctx):
+        # send random awoo content
         await self.send_image_embed(ctx, random.choice(constant_media.AWOO_SET))
 
     @commands.command(name = "bonk")
     async def _bonk(self, ctx):
+        # send bonk
         await self.send_image_embed(ctx, "https://cdn.discordapp.com/attachments/942174974754566204/942293277485445160/02018.jpg")
 
+    @commands.command(name = "nyaa", aliases=["nyah", "nya"])
+    async def _nyaa(self, ctx):
+        # send random nyaa content
+        await self.send_image_embed(ctx, random.choice(constant_media.NYAA_SET))
 
     
+
+    # module commands go here,
+    # since its not possible to register commands in a cog without using the decorator,
+    # i'm just adding the command for each module myself instead of in a config somewhere else
+
+    # currently just forcing 'sfw' or 'nsfw' content for each command cause i don't have time to sort through it all
+
     @commands.command(name='appleworm', aliases=['worm'])
     async def _appleworm(self, ctx):
         await self.image_embed(ctx, 'appleworm', 'sfw')

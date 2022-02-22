@@ -16,9 +16,17 @@ AWOO_SET = [
 
 
 
+NYAA_SET = [
+    "https://cdn.discordapp.com/attachments/942174974754566204/945690861709197362/unknown.gif",
+    "https://cdn.discordapp.com/attachments/942174974754566204/945690902687518740/playiwthmenyaa.jpg",
+    "https://cdn.discordapp.com/attachments/942174974754566204/945690979137110056/padorunyaa.png",
+    "https://cdn.discordapp.com/attachments/942174974754566204/945691502057775114/iloveyounya.jpg",
+    "https://cdn.discordapp.com/attachments/942174974754566204/945691792152608879/nyahpukes.jpg",
+    "https://cdn.discordapp.com/attachments/942174974754566204/945693238386393108/unknown.png"
+]
 
 
-
+DIF_BETWEEN_LOLI_AND_SMOL = "https://cdn.discordapp.com/attachments/942174974754566204/942302273516748860/the_difference_between_loli_and_petite.png"
 
 
 
