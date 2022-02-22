@@ -20,7 +20,7 @@ LINKS_NSFW_FORMAT = "config\\sauce\\{0}\\{0}_links_nsfw.txt"
 LINK_FILE_END   = "--links-end--"
 
 MODULES = ["appleworm", "bondage", "cutegirls", "feet", "femboy", "fubuki", "gura", "hutao", 
-           "kemonomimi", "mori", "navel", "okayu", "panties", "pekora", "rushia", "suisei", "thighs", "witch"]
+           "kemonomimi", "mori", "navel", "okayu", "panties", "pekora", "rushia", "suisei", "thighs", "witch", "nyaa"]
 
 SAUCE_MAP = { }
 
@@ -346,10 +346,7 @@ class ImageCommands(commands.Cog):
         # send bonk
         await self.send_image_embed(ctx, "https://cdn.discordapp.com/attachments/942174974754566204/942293277485445160/02018.jpg")
 
-    @commands.command(name = "nyaa", aliases=["nyah", "nya"])
-    async def _nyaa(self, ctx):
-        # send random nyaa content
-        await self.send_image_embed(ctx, random.choice(constant_media.NYAA_SET))
+   
 
     
 
@@ -358,6 +355,10 @@ class ImageCommands(commands.Cog):
     # i'm just adding the command for each module myself instead of in a config somewhere else
 
     # currently just forcing 'sfw' or 'nsfw' content for each command cause i don't have time to sort through it all
+    
+    @commands.command(name = "nyaa", aliases=["nyah", "nya", "nyaaa", "nyaaaa", "nyaaaaa", "nyaaaaaa"])
+    async def _nyaa(self, ctx):
+        await self.image_embed(ctx, 'nyaa', 'sfw')
 
     @commands.command(name='appleworm', aliases=['worm'])
     async def _appleworm(self, ctx):

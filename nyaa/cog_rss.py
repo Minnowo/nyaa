@@ -76,6 +76,29 @@ class RSS(commands.Cog):
         print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
 
+
+    def subscribe_channel(self, server_id, channel_id):
+        print("adding channe:", channel_id)
+        
+        server_id = str(server_id)
+
+        if server_id in self.rss_channel_map:
+            self.rss_channel_map[server_id].add(channel_id)
+            return True
+
+        self.rss_channel_map[server_id] = set()
+        self.rss_channel_map[server_id].add(channel_id)
+        return True 
+
+    def unsubscribe_channel(self, server_id, channel_id):
+        print("removing channel:", channel_id)
+
+        server_id = str(server_id)
+
+        if server_id in self.rss_channel_map:
+            self.rss_channel_map[server_id].remove(channel_id)
+            return True 
+
     
     def handle_discord_message(self, message : discord.message):
 
@@ -142,7 +165,7 @@ class RSS(commands.Cog):
             return
 
         if not channel:
-            if rss_handler.RSSHandler.instance.subscribe_channel(ctx.guild.id, ctx.channel.id):
+            if self.subscribe_channel(ctx.guild.id, ctx.channel.id):
                 await ctx.send("successfully subscribed to the channel")
                 return 
 
@@ -172,7 +195,7 @@ class RSS(commands.Cog):
                 await ctx.send(f"cannot find channel with given id: {id}")
                 return 
 
-            if rss_handler.RSSHandler.instance.subscribe_channel(ctx.guild.id, channel.id):
+            if self.subscribe_channel(ctx.guild.id, channel.id):
                 await ctx.send("successfully subscribed to the channel")
                 return 
 
