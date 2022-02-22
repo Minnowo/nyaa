@@ -1,6 +1,7 @@
 
 import discord
-from re import compile
+
+from . import regex
 
 class RSSHandler():
     
@@ -12,8 +13,7 @@ class RSSHandler():
 
     channels = set()
 
-    RE_DISCORD_LINK = compile(r"(https?://)?(cdn\.discordapp\.com)|(media\.discordapp\.net)/attachments/(\d+)/(\d+)/([^\s]+)")
-    MATCH_RE_DISCORD_LINK = compile(r"(?:https?://)(?:(?:cdn\.discordapp\.com)|(?:media\.discordapp\.net))/attachments/\d+/\d+/[^\s]+")
+    
 
     @staticmethod 
     def get_instance():
@@ -73,7 +73,7 @@ class RSSHandler():
 
         links = set()
         
-        for i in self.MATCH_RE_DISCORD_LINK.findall(message.content):
+        for i in regex.MATCH_RE_DISCORD_LINK.findall(message.content):
             links.add(i)
 
         for i in message.attachments:

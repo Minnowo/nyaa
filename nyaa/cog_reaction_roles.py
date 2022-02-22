@@ -10,21 +10,39 @@ import uuid
 import traceback
 import argparse
 import shlex
+import os 
 
 from . import util
 from . import constants
+from . import config
 
 class ReactionRoles(commands.Cog):
+
+    conf_path = None 
 
     reaction_roles_data = {}
 
     nyaa_cog = True
 
     def __init__(self, bot):
+        print(f"   Loading {constants.bcolors.WARNING}ReactionRoles{constants.bcolors.ENDC} ->", end="", flush=True)
+
         self.bot = bot
 
+        self.conf_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), constants.REACTION_ROLES_CONFIG)
+
+        config.load(self.conf_path, conf = self.reaction_roles_data)
+       
+        print(constants.bcolors.OKGREEN + " Done" + constants.bcolors.ENDC)
+
+
     def __del__(self):
-        pass 
+
+        print("\nReactionRoles Cog Closing:")
+        print("   Saving config... ->", end="", flush=True)
+        config.save(self.conf_path, conf = self.reaction_roles_data)
+        print(constants.bcolors.OKGREEN + " Done" + constants.bcolors.ENDC)
+        
     
     async def cog_check(self, ctx):
         """A local check which applies to all commands in this cog."""

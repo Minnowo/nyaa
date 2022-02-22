@@ -188,8 +188,13 @@ class Music(commands.Cog):
     __slots__ = ('bot', 'players')
 
     def __init__(self, bot):
+        
+        print(f"   Loading {constants.bcolors.WARNING}Music{constants.bcolors.ENDC} ->", end="", flush=True)
+
         self.bot = bot
         self.players = {}
+
+        print(constants.bcolors.OKGREEN + " Done" + constants.bcolors.ENDC)
 
     def __del__(self):
         pass 

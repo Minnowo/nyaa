@@ -13,8 +13,8 @@ from . import constants
 from . import config
 from . import util
 from . import threaded_queue
-from . import cog_user_join_message
-from . import cog_reaction_roles
+# from . import cog_user_join_message
+# from . import cog_reaction_roles
 from . import rss_handler
 
 # reads the given file and searches for any class with the 'nyaa_cog' member and returns it
@@ -32,36 +32,26 @@ def get_cog_classes(name):
     ]
 
 
-# loads the config files for the cogs and bot information
-def load_configs():
-
-    # config for bot information (prefix, token)
-    config.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), constants.BOT_CONFIG), "bot", True)
-
-    # config for rss channels (poorly names cause i kinda gave up on it so now its just a listener basically)
-    config.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), constants.RSS_CONFIG), conf = rss_handler.RSSHandler.rss_channel_map)
-
-    # config for user leave / join cog 
-    config.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), constants.LEAVE_JOIN_CONFIG), conf = cog_user_join_message.LeaveJoinMessage.event_map)
-
-    # these cogs use set() instead of list() so convert all list to set
-    util.replace_list_set(rss_handler.RSSHandler.rss_channel_map)
-    util.replace_list_set(cog_user_join_message.LeaveJoinMessage.event_map)
-
-# save config files
-def save_configs():
-
-    config.save(os.path.join(os.path.dirname(os.path.abspath(__file__)), constants.RSS_CONFIG), conf = rss_handler.RSSHandler.rss_channel_map)
-    config.save(os.path.join(os.path.dirname(os.path.abspath(__file__)), constants.LEAVE_JOIN_CONFIG), conf = cog_user_join_message.LeaveJoinMessage.event_map)
-    config.save(os.path.join(os.path.dirname(os.path.abspath(__file__)), constants.REACTION_ROLES_CONFIG), conf = cog_reaction_roles.ReactionRoles.reaction_roles_data)
 
 def main():
-    
+    os.system("") # enable console color on windows 
+
+    # print(f"HEADER    : {constants.bcolors.HEADER}test{constants.bcolors.ENDC}")
+    # print(f"OKBLUE    : {constants.bcolors.OKBLUE}test{constants.bcolors.ENDC}")
+    # print(f"OKCYAN    : {constants.bcolors.OKCYAN}test{constants.bcolors.ENDC}")
+    # print(f"OKGREEN   : {constants.bcolors.OKGREEN}test{constants.bcolors.ENDC}")
+    # print(f"WARNING   : {constants.bcolors.WARNING}test{constants.bcolors.ENDC}")
+    # print(f"FAIL      : {constants.bcolors.FAIL}test{constants.bcolors.ENDC}")
+    # print(f"BOLD      : {constants.bcolors.BOLD}test{constants.bcolors.ENDC}")
+    # print(f"UNDERLINE : {constants.bcolors.UNDERLINE}test{constants.bcolors.ENDC}")
+    # return 
     print("\nstarting bot:")
-    print("loading configs...")
+    print("loading bot config...", end="", flush=True)
 
     # load configs 
-    load_configs()
+    config.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), constants.BOT_CONFIG), "bot", True)
+
+    print(constants.bcolors.OKGREEN + " Done." + constants.bcolors.ENDC)
 
     # get bot instance 
     bot = commands.Bot(command_prefix = config.get(("bot"), "prefix"), intents=discord.Intents.all())
@@ -71,11 +61,9 @@ def main():
     config.set(("bot"), "instance", bot)
 
     print("loading cogs...")
-    print("====================================")
     
     # read the list of cogs pre-defined in config.py
     for i in config.get(("bot"), "cogs"):
-        print("loading cog:", i)
 
         # import all cog classes from the file
         for ii in get_cog_classes(i):
@@ -89,9 +77,9 @@ def main():
                 # add to loaded cogs 
                 config.set(("bot", "loaded_cogs"), i, instance)
             except Exception as e:
-                print(f"failed to load cog '{i}' -> {e}")
+                print(constants.bcolors.FAIL + "ERROR loading cog:")
+                print(f"   {e}" + constants.bcolors.ENDC)
 
-    print("====================================")
     print("\nrunning event loop...\n")    
 
     try:
@@ -99,17 +87,13 @@ def main():
         loop = asyncio.get_event_loop()
         loop.run_until_complete(bot.start(config.get(("bot"), "token")))
     except KeyboardInterrupt:
-        print("KeyboardInterrupt")
+        print(constants.bcolors.FAIL + "KeyboardInterrupt" + constants.bcolors.ENDC)
 
     # dispose any threaded queue used by any cogs
     for name, thread in threaded_queue.active_threads.items():
-        print("ending thread:", name)
+        print("ending thread:", name, end="", flush=True)
         thread.cleanup()
-
-    print("saving configs")
-
-    # save configs 
-    save_configs()
+        print(constants.bcolors.OKGREEN + " Done." + constants.bcolors.ENDC)
 
     # delete any cog instances 
     loaded = config.get(("bot",), "loaded_cogs")

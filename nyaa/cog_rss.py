@@ -3,6 +3,7 @@ import traceback
 import discord
 
 import sys 
+import os 
 
 from discord.ext import commands
 
@@ -11,22 +12,49 @@ from . import rss_handler
 from . import regex
 from . import util
 from . import constants
+from . import config 
 
 class RSS(commands.Cog):
     """ cogs for handling RSS content sent from webhooks"""
 
     nyaa_cog = True
 
+    config_path = None
+
+    rss_channel_map = {
+
+    }
+
     def __init__(self, bot) -> None:
         
+        print(f"   Loading {constants.bcolors.WARNING}RSS{constants.bcolors.ENDC} ->", end="", flush=True)
+
         self.bot = bot
-        self.worker_queue  = threaded_queue.WorkerQueue(rss_handler.RSSHandler.get_instance().handle_discord_message)
-        threaded_queue.active_threads["rss"] = self.worker_queue
+
+        self.config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), constants.RSS_CONFIG)
+
+        config.load(self.config_path, conf = self.rss_channel_map)
+    
+        util.replace_list_set(self.rss_channel_map)
+
+        self.worker_queue  = threaded_queue.WorkerQueue(self.handle_discord_message)
+        
+        print(constants.bcolors.OKGREEN + " Done." + constants.bcolors.ENDC)
 
 
     def __del__(self):
-        pass 
-    
+        
+        print("\nRSS Cog Closing:")
+
+        self.worker_queue.cleanup()
+
+        print("   Saving config... ->", end="", flush=True)
+
+        config.save(self.config_path, conf = self.rss_channel_map)
+        
+        print(constants.bcolors.OKGREEN + " Done." + constants.bcolors.ENDC)
+
+
     async def cog_check(self, ctx):
         """A local check which applies to all commands in this cog."""
         
@@ -47,6 +75,39 @@ class RSS(commands.Cog):
         
         print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+
+    
+    def handle_discord_message(self, message : discord.message):
+
+        if not message.guild:
+            return
+
+        i_server_id = message.guild.id
+        s_server_id = str(message.guild.id)
+        channel_id = message.channel.id
+
+        if s_server_id not in self.rss_channel_map:
+            return 
+
+        if channel_id not in self.rss_channel_map[s_server_id]:
+            return
+
+        links = set()
+        
+        for i in regex.MATCH_RE_DISCORD_LINK.findall(message.content):
+            links.add(i)
+
+        for i in message.attachments:
+            links.add(i.url)
+
+        if links:
+            with open("config\\links.txt", "a") as writer:
+                
+                for i in links:
+                    print("adding " + i)    
+                    writer.write(i.strip() + "\n")
+
+        # print("message recieved for channel")
 
 
     @commands.command(name='subs', aliases=['subscribed'])

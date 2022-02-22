@@ -34,7 +34,11 @@ class ImageCommands(commands.Cog):
     # on delete save all configs 
     def __del__(self):
         
+        print("\nImageCommands Cog Closing:")
+
         for i in SAUCE_MAP:
+
+            print(f"   Saving Module: {constants.bcolors.OKCYAN}{i}...{constants.bcolors.ENDC}  ->", end="", flush=True)
 
             # close all open file handles 
             for ii in SAUCE_MAP[i]["handles"]:
@@ -47,14 +51,16 @@ class ImageCommands(commands.Cog):
                 with open(SAUCE_MAP[i]["paths"]["config"], "w") as writer:
                     json.dump(SAUCE_MAP[i]["config"], writer, indent=5)
 
-                print(f"Image config saved for '{i}'.")
+                print(constants.bcolors.OKGREEN + " Done" + constants.bcolors.ENDC)
 
             except Exception as e:
-                print(f"Could not save config for '{i}' -> '{e}'")
+                print(constants.bcolors.FAIL + f" {e}" + + constants.bcolors.ENDC)
     
 
     def __init__(self, bot):
         
+        print(f"   Loading {constants.bcolors.WARNING}ImageCommands{constants.bcolors.ENDC} ->", end="", flush=True)
+
         self.bot = bot 
 
         # lambda only used here 
@@ -166,6 +172,8 @@ class ImageCommands(commands.Cog):
                     
                     # set the handle
                     SAUCE_MAP[i]["handles"]["nsfw"] = handle
+        
+        print(constants.bcolors.OKGREEN + " Done" + constants.bcolors.ENDC)
 
 
     async def cog_command_error(self, ctx, error):

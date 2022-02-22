@@ -23,7 +23,7 @@ class BotEvents(commands.Cog):
 
         if not ctx.guild:
             raise commands.NoPrivateMessage
-            
+
         return True
 
     async def cog_command_error(self, ctx, error):
@@ -47,10 +47,10 @@ class BotEvents(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print("====================================")
-        print(" \"{0.user.name}\"  has connected".format(self.bot))
+        print(" \"{0.user.name}\" {1} has connected{2}".format(self.bot, constants.bcolors.OKGREEN, constants.bcolors.ENDC))
         print("====================================")
         print("\nServers:")
         print("====================================\n")
         for i in self.bot.guilds:
-            print(" [ {0.name}".format(i))
+            print(" {1}[{2} {0.name}".format(i, constants.bcolors.OKGREEN, constants.bcolors.ENDC))
         print("\n====================================")

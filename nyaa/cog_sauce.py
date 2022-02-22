@@ -26,8 +26,12 @@ class Sauce(commands.Cog):
         pass 
     
     def __init__(self, bot):
+
+        print(f"   Loading {constants.bcolors.WARNING}Sauce{constants.bcolors.ENDC} ->", end="", flush=True)
         
         self.bot = bot 
+
+        print(constants.bcolors.OKGREEN + " Done." + constants.bcolors.ENDC)
     
 
     async def cog_check(self, ctx):

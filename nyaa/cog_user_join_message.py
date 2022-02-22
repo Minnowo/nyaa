@@ -3,6 +3,7 @@ import traceback
 import sys
 import discord
 import datetime
+import os 
 from discord import permissions
 
 from discord.ext import commands
@@ -11,9 +12,12 @@ from discord.ext.commands.context import Context
 from . import util
 from . import constants
 from . import regex
+from . import config 
 
 class LeaveJoinMessage(commands.Cog):
     """ handles user leave / join message """
+
+    config_path = None
 
     event_map = {
         constants.MEMBER_LEAVE : {
@@ -28,10 +32,26 @@ class LeaveJoinMessage(commands.Cog):
     nyaa_cog = True
 
     def __init__(self, bot) -> None:
+
+        print(f"   Loading {constants.bcolors.WARNING}LeaveJoinMessage{constants.bcolors.ENDC} ->", end="", flush=True)
+
         self.bot = bot
 
+        self.config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), constants.LEAVE_JOIN_CONFIG)
+        
+        config.load(self.config_path, conf = self.event_map)
+
+        util.replace_list_set(self.event_map)
+
+        print(constants.bcolors.OKGREEN + " Done." + constants.bcolors.ENDC)
+
+
     def __del__(self):
-        pass 
+        print("\nLeaveJoinMessage Cog Closing:")
+        print("   Saving config... ->", end="", flush=True)
+        config.save(self.config_path, conf = self.event_map)
+        print(constants.bcolors.OKGREEN + " Done" + constants.bcolors.ENDC)
+        
     
     async def cog_check(self, ctx):
         """A local check which applies to all commands in this cog."""

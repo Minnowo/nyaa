@@ -19,7 +19,13 @@ class ServerUtil(commands.Cog):
     nyaa_cog = True
 
     def __init__(self, bot) -> None:
+
+        print(f"   Loading {constants.bcolors.WARNING}ServerUtil{constants.bcolors.ENDC} ->", end="", flush=True)
+
         self.bot = bot
+
+        print(constants.bcolors.OKGREEN + " Done." + constants.bcolors.ENDC)
+
 
     def __del__(self):
         pass 

@@ -56,3 +56,7 @@ class WorkerQueue():
 
         # cleanup our thread 
         self.thread.join()
+
+
+    def __del__(self):
+        self.cleanup()
