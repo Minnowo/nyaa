@@ -15,7 +15,7 @@ from . import util
 from . import threaded_queue
 # from . import cog_user_join_message
 # from . import cog_reaction_roles
-from . import rss_handler
+# from . import rss_handler
 
 # reads the given file and searches for any class with the 'nyaa_cog' member and returns it
 # this is used to import the cogs without using the builtin function because its bad 

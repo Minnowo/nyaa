@@ -8,7 +8,7 @@ import os
 from discord.ext import commands
 
 from . import threaded_queue
-from . import rss_handler
+# from . import rss_handler
 from . import regex
 from . import util
 from . import constants
@@ -31,12 +31,14 @@ class RSS(commands.Cog):
 
         self.bot = bot
 
+        # load the config 
         self.config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), constants.RSS_CONFIG)
 
         config.load(self.config_path, conf = self.rss_channel_map)
     
         util.replace_list_set(self.rss_channel_map)
 
+        # get a thread for the message queue 
         self.worker_queue  = threaded_queue.WorkerQueue(self.handle_discord_message)
         
         print(constants.bcolors.OKGREEN + " Done." + constants.bcolors.ENDC)
@@ -134,27 +136,30 @@ class RSS(commands.Cog):
 
 
     @commands.command(name='subs', aliases=['subscribed'])
-    async def listsubs_(self, ctx, *, _):
+    async def listsubs_(self, ctx):
         
-        embed = discord.Embed(color = constants.EMBED_COLOR)
+        # embed = discord.Embed(color = constants.EMBED_COLOR)
+        # embed.add_field(name="uwu", value="owo")
         
-        for server_id in rss_handler.RSSHandler.rss_channel_map:
-            for channel_id in rss_handler.RSSHandler.rss_channel_map[server_id]:
+        print(self.rss_channel_map)
 
-                server = self.bot.get_guild(server_id)
+        # for server_id in self.rss_channel_map:
+        #     for channel_id in self.rss_channel_map[server_id]:
 
-                if not server:
-                    continue
+        #         server = self.bot.get_guild(server_id)
 
-                channel = server.get_channel(channel_id)
+        #         if not server:
+        #             continue
 
-                if not channel:
-                    continue
+        #         channel = server.get_channel(channel_id)
 
-                embed.add_field(name = str(channel_id), 
-                                value = 'name: {0}\nserver: {1}'.format(channel.name, channel.guild.name), inline=False)
+        #         if not channel:
+        #             continue
 
-        await ctx.send(embed = embed)
+        #         embed.add_field(name = str(channel_id), 
+        #                         value = 'name: {0}\nserver: {1}'.format(channel.name, channel.guild.name), inline=False)
+
+        # await ctx.send(embed = embed)
 
 
     @commands.command(name='rss')

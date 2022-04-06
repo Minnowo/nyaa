@@ -20,7 +20,7 @@ LINKS_NSFW_FORMAT = "config\\sauce\\{0}\\{0}_links_nsfw.txt"
 LINK_FILE_END   = "--links-end--"
 
 MODULES = ["appleworm", "bondage", "cutegirls", "feet", "femboy", "fubuki", "gura", "hutao", 
-           "kemonomimi", "mori", "navel", "okayu", "panties", "pekora", "rushia", "suisei", "thighs", "witch", "nyaa"]
+           "kemonomimi", "mori", "navel", "okayu", "panties", "pekora", "rushia", "suisei", "thighs", "witch", "nyaa", "ranni", "laplus"]
 
 SAUCE_MAP = { }
 
@@ -356,6 +356,14 @@ class ImageCommands(commands.Cog):
 
     # currently just forcing 'sfw' or 'nsfw' content for each command cause i don't have time to sort through it all
     
+    @commands.command(name = "laplus", aliases=["la+"])
+    async def _laplus(self, ctx):
+        await self.image_embed(ctx, 'laplus', 'nsfw')
+
+    @commands.command(name = "ranni")
+    async def _ranni(self, ctx):
+        await self.image_embed(ctx, 'ranni', 'nsfw')
+
     @commands.command(name = "nyaa", aliases=["nyah", "nya", "nyaaa", "nyaaaa", "nyaaaaa", "nyaaaaaa"])
     async def _nyaa(self, ctx):
         await self.image_embed(ctx, 'nyaa', 'sfw')
@@ -393,8 +401,16 @@ class ImageCommands(commands.Cog):
         await self.image_embed(ctx, 'hutao', 'nsfw')
 
     @commands.command(name='kemonomimi', aliases=['kemo', 'neko'])
-    async def _kemonomimi(self, ctx):
-        await self.image_embed(ctx, 'kemonomimi', 'nsfw')
+    async def _kemonomimi(self, ctx, sfw : str = None):
+        if sfw is None:
+            await self.image_embed(ctx, 'kemonomimi')
+        
+        else:
+            if len(sfw) >= 1:
+                if sfw[0].lower() == "n":
+                    await self.image_embed(ctx, 'kemonomimi', "nsfw")
+                elif sfw[0].lower() == "s":
+                    await self.image_embed(ctx, 'kemonomimi', "sfw")
 
     @commands.command(name='mori', aliases=['cali'])
     async def _mori(self, ctx):
