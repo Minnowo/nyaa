@@ -20,7 +20,8 @@ LINKS_NSFW_FORMAT = "config\\sauce\\{0}\\{0}_links_nsfw.txt"
 LINK_FILE_END   = "--links-end--"
 
 MODULES = ["appleworm", "bondage", "cutegirls", "feet", "femboy", "fubuki", "gura", "hutao", 
-           "kemonomimi", "mori", "navel", "okayu", "panties", "pekora", "rushia", "suisei", "thighs", "witch", "nyaa", "ranni", "laplus"]
+           "kemonomimi", "mori", "navel", "okayu", "panties", "pekora", "rushia", "suisei", 
+           "thighs", "witch", "nyaa", "ranni", "laplus", "subaru", "baelz"]
 
 SAUCE_MAP = { }
 
@@ -356,6 +357,14 @@ class ImageCommands(commands.Cog):
 
     # currently just forcing 'sfw' or 'nsfw' content for each command cause i don't have time to sort through it all
     
+    @commands.command(name = "baelz", aliases = ["hakos", "hakosbaelz", "bae"])
+    async def _bae(self, ctx):
+        await self.image_embed(ctx, 'baelz', 'nsfw')
+
+    @commands.command(name = "subaru")
+    async def _subaru(self, ctx):
+        await self.image_embed(ctx, 'subaru', 'sfw')
+
     @commands.command(name = "laplus", aliases=["la+"])
     async def _laplus(self, ctx):
         await self.image_embed(ctx, 'laplus', 'nsfw')

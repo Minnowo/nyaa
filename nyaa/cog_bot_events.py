@@ -5,14 +5,16 @@ import discord
 import random
 from discord.ext import commands
 from . import constants
+from . import n_database as db 
 
 # cog used for debug and bot events 
 class BotEvents(commands.Cog):
     """ events for the bot """
 
     nyaa_cog = True
-
+    
     def __init__(self, bot) -> None:
+        self.DB_SESSION = db.DB.get_instance()
         self.bot = bot
 
     def __del__(self):
@@ -53,4 +55,9 @@ class BotEvents(commands.Cog):
         print("====================================\n")
         for i in self.bot.guilds:
             print(" {1}[{2} {0.name}".format(i, constants.bcolors.OKGREEN, constants.bcolors.ENDC))
+            self.DB_SESSION.add_server(i.id, i.name, i.owner_id, i.created_at)
         print("\n====================================")
+
+        self.DB_SESSION.commit()
+
+

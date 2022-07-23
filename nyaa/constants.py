@@ -8,6 +8,7 @@ CONFIG_FILE           = "config\\conf.json"                            # current
 LEAVE_JOIN_CONFIG     = "config\\leave_join.json"                      # contains data for leave/join cog
 REACTION_ROLES_CONFIG = "config\\reaction_roles.json"                  # contains data for reaction roles
 RSS_CONFIG            = "config\\rss.json"                             # contains data for rss feed 
+DATABASE_PATH         = "config\\main.db"
 ########################################################################
 ####################### sauce command url files ########################
 ########################################################################
@@ -108,7 +109,7 @@ EMBED_USER_JOIN_COLOR = 0x04c41a                                       # color u
 ########################################################################
 ############################# other ####################################
 ########################################################################
-VALID_AUDIO_FILES = ['mp3','wav','flac','aac','ogg']                   # file extension that can be downloaded for the music bot 
+VALID_AUDIO_FILES = ['mp3','wav','flac','aac','ogg', 'm4a', 'opus']                   # file extension that can be downloaded for the music bot 
 # event names 
 MEMBER_JOIN  = "join"
 MEMBER_LEAVE = "leave"

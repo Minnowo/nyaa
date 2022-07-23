@@ -13,6 +13,7 @@ from . import constants
 from . import config
 from . import util
 from . import threaded_queue
+from . import n_database
 # from . import cog_user_join_message
 # from . import cog_reaction_roles
 # from . import rss_handler
@@ -59,6 +60,10 @@ def main():
 
     # make bot instance global through the config 
     config.set(("bot"), "instance", bot)
+
+    db_instance = n_database.DB.get_instance()
+    db_instance.connect()
+    db_instance.create_tables()
 
     print("loading cogs...")
     

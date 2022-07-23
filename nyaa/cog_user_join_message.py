@@ -13,20 +13,14 @@ from . import util
 from . import constants
 from . import regex
 from . import config 
+from . import n_database as db
+
 
 class LeaveJoinMessage(commands.Cog):
     """ handles user leave / join message """
 
     config_path = None
-
     event_map = {
-        constants.MEMBER_LEAVE : {
-            # serverid           : channels
-            # 381952489655894016 : [],
-        },
-        constants.MEMBER_JOIN : {
-
-        }
     }
 
     nyaa_cog = True
@@ -35,13 +29,22 @@ class LeaveJoinMessage(commands.Cog):
 
         print(f"   Loading {constants.bcolors.WARNING}LeaveJoinMessage{constants.bcolors.ENDC} ->", end="", flush=True)
 
+        self.DB_SESSION = db.DB.get_instance()
+        self.DB_SESSION.add_event(constants.MEMBER_LEAVE)
+        self.DB_SESSION.add_event(constants.MEMBER_JOIN)
+
+        self.MEMBER_JOIN_EVENT  = self.DB_SESSION.select_event_id_by_name(constants.MEMBER_JOIN)
+        self.MEMBER_LEAVE_EVENT = self.DB_SESSION.select_event_id_by_name(constants.MEMBER_LEAVE)
+        self.event_map[constants.MEMBER_JOIN] = self.MEMBER_JOIN_EVENT
+        self.event_map[constants.MEMBER_LEAVE] = self.MEMBER_LEAVE_EVENT
+
         self.bot = bot
 
         self.config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), constants.LEAVE_JOIN_CONFIG)
         
-        config.load(self.config_path, conf = self.event_map)
+        # config.load(self.config_path, conf = self.event_map)
 
-        util.replace_list_set(self.event_map)
+        # util.replace_list_set(self.event_map)
 
         print(constants.bcolors.OKGREEN + " Done." + constants.bcolors.ENDC)
 
@@ -49,7 +52,7 @@ class LeaveJoinMessage(commands.Cog):
     def __del__(self):
         print("\nLeaveJoinMessage Cog Closing:")
         print("   Saving config... ->", end="", flush=True)
-        config.save(self.config_path, conf = self.event_map)
+        # config.save(self.config_path, conf = self.event_map)
         print(constants.bcolors.OKGREEN + " Done" + constants.bcolors.ENDC)
         
     
@@ -88,9 +91,11 @@ class LeaveJoinMessage(commands.Cog):
 
         guild = member.guild 
 
-        for channel_id in self.event_map[constants.MEMBER_JOIN].get(str(guild.id), []):
+        # for channel_id in self.event_map[constants.MEMBER_JOIN].get(str(guild.id), []):
+        for channel_id in self.DB_SESSION.select_channels_where_event(int(guild.id), self.MEMBER_JOIN_EVENT):
             
-            channel = guild.get_channel(channel_id)
+            channel = guild.get_channel(channel_id['channel_id'])
+            # channel = guild.get_channel(channel_id)
 
             if not channel:
                 continue
@@ -111,9 +116,11 @@ class LeaveJoinMessage(commands.Cog):
 
         guild = member.guild 
 
-        for channel_id in self.event_map[constants.MEMBER_LEAVE].get(str(guild.id), []):
+        for channel_id in self.DB_SESSION.select_channels_where_event(int(guild.id), self.MEMBER_LEAVE_EVENT):
+        # for channel_id in self.event_map[constants.MEMBER_LEAVE].get(str(guild.id), []):
             
-            channel = guild.get_channel(channel_id)
+            channel = guild.get_channel(channel_id['channel_id'])
+            # channel = guild.get_channel(channel_id)
 
             if not channel:
                 continue
@@ -133,16 +140,16 @@ class LeaveJoinMessage(commands.Cog):
     async def subscribe_(self, ctx, event : str = None, channel : str = None):
         
         if not event or event not in self.event_map:
-            await ctx.send(f"Must specify the event to subscribe -> {constants.MEMBER_LEAVE}, {constants.MEMBER_JOIN}")
+            await ctx.send(f"Must specify the event to subscribe -> '{constants.MEMBER_LEAVE}' or '{constants.MEMBER_JOIN}'")
             return 
 
-        server_id = str(ctx.guild.id)
-
-        if server_id not in self.event_map[event]:
-            self.event_map[event][server_id] = set()
+        self.DB_SESSION.add_server(ctx.guild.id, ctx.guild.name, ctx.guild.owner_id, ctx.guild.created_at)
 
         if not channel:
-            self.event_map[event][server_id].add(ctx.channel.id)
+            self.DB_SESSION.add_channel(ctx.guild.id, ctx.channel.id, ctx.channel.name, 0)
+            self.DB_SESSION.add_channel_event(ctx.channel.id, self.event_map[event.lower()])
+            self.DB_SESSION.commit()
+            
             await ctx.send("Subscribed to the current channel uwu")
             return
 
@@ -165,7 +172,10 @@ class LeaveJoinMessage(commands.Cog):
             await ctx.send(f"I cannot find channel with given id: {id}")
             return 
 
-        self.event_map[event][server_id].add(channel.id)
+        self.DB_SESSION.add_channel(ctx.guild.id, channel.id, channel.name, 0)
+        self.DB_SESSION.add_channel_event(channel.id, self.event_map[event.lower()])
+        self.DB_SESSION.commit()
+        
         await ctx.send(f"Subscribed to the channel with the id: {id}")
 
 
@@ -177,14 +187,8 @@ class LeaveJoinMessage(commands.Cog):
             await ctx.send(f"Must specify the event to subscribe -> {constants.MEMBER_LEAVE}, {constants.MEMBER_JOIN}")
             return 
 
-        server_id = str(ctx.guild.id)
-
-        if server_id not in self.event_map[event]:
-            await ctx.send("There are no event subscriptions for this server")
-            return 
-
         if not channel:
-            self.event_map[event][server_id].remove(ctx.channel.id)
+            self.DB_SESSION.remove_channel_event_2(ctx.guild.id, ctx.channel.id, self.event_map[event.lower()])
             await ctx.send("Unsubscribed from the current channel uwo")
             return
 
@@ -200,7 +204,7 @@ class LeaveJoinMessage(commands.Cog):
             await ctx.send(f"I cannot find channel with given id: {id}")
             return 
 
-        self.event_map[event][server_id].remove(channel.id)
+        self.DB_SESSION.remove_channel_event_2(ctx.guild.id, channel.id, self.event_map[event.lower()])
         await ctx.send(f"Unsubscribed from the channel with the id: {id}")
 
     
