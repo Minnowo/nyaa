@@ -6,6 +6,7 @@ nyaa/dl/
 nyaa/legacy/
 nyaa/ffmpeg.exe 
 nyaa/yt-dlp.exe 
+nyaa2/.nyaa/
 *.db
 
 # Byte-compiled / optimized / DLL files

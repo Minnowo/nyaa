@@ -61,7 +61,7 @@ def main():
     # make bot instance global through the config 
     config.set(("bot"), "instance", bot)
 
-    db_instance = n_database.DB.get_instance()
+    db_instance = n_database.Discord_Tables.get_instance()
     db_instance.connect()
     db_instance.create_tables()
 

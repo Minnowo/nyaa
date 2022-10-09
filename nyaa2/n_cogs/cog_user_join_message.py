@@ -9,25 +9,22 @@ from discord import permissions
 from discord.ext import commands
 from discord.ext.commands.context import Context
 
-from . import util
-from . import constants
-from . import regex
-from . import config 
-from . import n_database as db
+from .. import util
+from .. import constants
+from .. import n_database as db
 
+from . import BaseNyaaCog
 
-class LeaveJoinMessage(commands.Cog):
+class LeaveJoinMessage(BaseNyaaCog):
     """ handles user leave / join message """
 
-    config_path = None
     event_map = {
     }
 
     nyaa_cog = True
 
     def __init__(self, bot) -> None:
-
-        print(f"   Loading {constants.bcolors.WARNING}LeaveJoinMessage{constants.bcolors.ENDC} ->", end="", flush=True)
+        BaseNyaaCog.__init__(self, bot)
 
         self.DB_SESSION = db.Discord_Tables.get_instance()
         self.DB_SESSION.add_event(constants.MEMBER_LEAVE)
@@ -35,29 +32,14 @@ class LeaveJoinMessage(commands.Cog):
 
         self.MEMBER_JOIN_EVENT  = self.DB_SESSION.select_event_id_by_name(constants.MEMBER_JOIN)
         self.MEMBER_LEAVE_EVENT = self.DB_SESSION.select_event_id_by_name(constants.MEMBER_LEAVE)
-        self.event_map[constants.MEMBER_JOIN] = self.MEMBER_JOIN_EVENT
+        self.event_map[constants.MEMBER_JOIN]  = self.MEMBER_JOIN_EVENT
         self.event_map[constants.MEMBER_LEAVE] = self.MEMBER_LEAVE_EVENT
 
-        self.bot = bot
 
         self.config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), constants.LEAVE_JOIN_CONFIG)
-        
-        # config.load(self.config_path, conf = self.event_map)
-
-        # util.replace_list_set(self.event_map)
-
-        print(constants.bcolors.OKGREEN + " Done." + constants.bcolors.ENDC)
 
 
-    def __del__(self):
-        print("\nLeaveJoinMessage Cog Closing:")
-        print("   Saving config... ->", end="", flush=True)
-        # config.save(self.config_path, conf = self.event_map)
-        print(constants.bcolors.OKGREEN + " Done" + constants.bcolors.ENDC)
-        
-    
     async def cog_check(self, ctx):
-        """A local check which applies to all commands in this cog."""
 
         if not ctx.guild:
             raise commands.NoPrivateMessage
@@ -67,23 +49,21 @@ class LeaveJoinMessage(commands.Cog):
             
         return True
 
+
+
     async def cog_command_error(self, ctx, error):
-        """A local error handler for all errors arising from commands in this cog."""
 
         if isinstance(error, commands.NoPrivateMessage):
-            try:
-                return await ctx.send('This command can not be used in Private Messages ;w;')
-            except discord.HTTPException:
-                pass
+
+            return await self.send_message_wrapped(ctx, 'This command can not be used in Private Messages ;w;')
 
         if isinstance(error, commands.MissingPermissions):
-            try:
-                return await ctx.send("You are missing permissions to use this command >:3")
-            except discord.HTTPException:
-                pass
+
+            return await self.send_message_wrapped(ctx, "You are missing permissions to use this command >:3")
         
-        print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
-        traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+        self.logger.error('Ignoring exception in command {}:'.format(ctx.command))
+        self.logger.error(error)
+
 
 
     @commands.Cog.listener()
@@ -91,11 +71,9 @@ class LeaveJoinMessage(commands.Cog):
 
         guild = member.guild 
 
-        # for channel_id in self.event_map[constants.MEMBER_JOIN].get(str(guild.id), []):
-        for channel_id in self.DB_SESSION.select_channels_where_event(int(guild.id), self.MEMBER_JOIN_EVENT):
+        for channel_id in self.DB_SESSION.select_channels_where_event(guild.id, self.MEMBER_JOIN_EVENT):
             
             channel = guild.get_channel(channel_id['channel_id'])
-            # channel = guild.get_channel(channel_id)
 
             if not channel:
                 continue
@@ -108,7 +86,7 @@ class LeaveJoinMessage(commands.Cog):
             leave_join_embed.add_field(name =f"**User:**", value = 'Mention: <@{}> \nName: {} \nId: {}'.format(member.id, member, member.id), inline=False)
             leave_join_embed.add_field(name =f"**Account Created On:**", value = member.created_at, inline=False)
 
-            await channel.send(embed = leave_join_embed)
+            await self.send_message_wrapped(channel, embed=leave_join_embed)
 
 
     @commands.Cog.listener()
@@ -116,11 +94,9 @@ class LeaveJoinMessage(commands.Cog):
 
         guild = member.guild 
 
-        for channel_id in self.DB_SESSION.select_channels_where_event(int(guild.id), self.MEMBER_LEAVE_EVENT):
-        # for channel_id in self.event_map[constants.MEMBER_LEAVE].get(str(guild.id), []):
+        for channel_id in self.DB_SESSION.select_channels_where_event(guild.id, self.MEMBER_LEAVE_EVENT):
             
             channel = guild.get_channel(channel_id['channel_id'])
-            # channel = guild.get_channel(channel_id)
 
             if not channel:
                 continue
@@ -133,50 +109,44 @@ class LeaveJoinMessage(commands.Cog):
             leave_join_embed.add_field(name =f"**User:**", value = 'Mention: <@{}> \nName: {} \nId: {}'.format(member.id, member, member.id), inline=False)
             leave_join_embed.add_field(name =f"**Account Created On:**", value = member.created_at, inline=False)
 
-            await channel.send(embed = leave_join_embed)
+            await self.send_message_wrapped(channel, embed=leave_join_embed)
 
 
     @commands.command(name='leave_join_message', aliases=['ljm'])
     async def subscribe_(self, ctx, event : str = None, channel : str = None):
         
         if not event or event not in self.event_map:
-            await ctx.send(f"Must specify the event to subscribe -> '{constants.MEMBER_LEAVE}' or '{constants.MEMBER_JOIN}'")
-            return 
+
+            return await self.send_message_wrapped(ctx, f"Must specify the event to subscribe -> '{constants.MEMBER_LEAVE}' or '{constants.MEMBER_JOIN}'")
 
         self.DB_SESSION.add_server(ctx.guild.id, ctx.guild.name, ctx.guild.owner_id, ctx.guild.created_at)
 
         if not channel:
+
             self.DB_SESSION.add_channel(ctx.guild.id, ctx.channel.id, ctx.channel.name, 0)
             self.DB_SESSION.add_channel_event(ctx.channel.id, self.event_map[event.lower()])
             self.DB_SESSION.commit()
             
-            await ctx.send("Subscribed to the current channel uwu")
-            return
+            return await self.send_message_wrapped(ctx, "Subscribed to the current channel")
 
-        # get the channel id from the mention string <#12345678>
-        m = regex.PARSE_CHANNEL_MENTION.search(channel)
+        id = util.get_channel_id_from_string(channel)
         
-        if m:
-            id = util.parse_int(m.group(1))
+        if not id:
 
-        else:
-            id = util.parse_int(channel, None)
+            return await self.send_message_wrapped(ctx, "Invalid channel")
 
-            if not channel:
-                await ctx.send("Invalid channel")
-                return
 
         channel = ctx.guild.get_channel(id)
         
         if not channel:
-            await ctx.send(f"I cannot find channel with given id: {id}")
-            return 
+            
+            return await self.send_message_wrapped(f"I cannot find channel with given id: {id}")
 
         self.DB_SESSION.add_channel(ctx.guild.id, channel.id, channel.name, 0)
         self.DB_SESSION.add_channel_event(channel.id, self.event_map[event.lower()])
         self.DB_SESSION.commit()
         
-        await ctx.send(f"Subscribed to the channel with the id: {id}")
+        await self.send_message_wrapped(ctx, f"Subscribed to the channel with the id: {id}")
 
 
 
@@ -184,27 +154,29 @@ class LeaveJoinMessage(commands.Cog):
     async def unsubscribe_(self, ctx, event : str = None, channel : str = None):
         
         if not event or event not in self.event_map:
-            await ctx.send(f"Must specify the event to subscribe -> {constants.MEMBER_LEAVE}, {constants.MEMBER_JOIN}")
-            return 
+
+            return await self.send_message_wrapped(ctx, f"Must specify the event to subscribe -> '{constants.MEMBER_LEAVE}' or '{constants.MEMBER_JOIN}'")
 
         if not channel:
+
             self.DB_SESSION.remove_channel_event_2(ctx.guild.id, ctx.channel.id, self.event_map[event.lower()])
-            await ctx.send("Unsubscribed from the current channel uwo")
-            return
+            
+            return await self.send_message_wrapped(ctx, "Unsubscribed from the current channel")
 
         id = util.get_channel_id_from_string(channel)
         
         if not id:
-            await ctx.send("Invalid channel")
-            return
+
+            return await self.send_message_wrapped(ctx, "Invalid channel")
 
         channel = ctx.guild.get_channel(id)
         
         if not channel:
-            await ctx.send(f"I cannot find channel with given id: {id}")
-            return 
+
+            return await self.send_message_wrapped(ctx, f"I cannot find channel with given id: {id}")
 
         self.DB_SESSION.remove_channel_event_2(ctx.guild.id, channel.id, self.event_map[event.lower()])
-        await ctx.send(f"Unsubscribed from the channel with the id: {id}")
+
+        await self.send_message_wrapped(ctx, f"Unsubscribed from the channel with the id: {id}")
 
     

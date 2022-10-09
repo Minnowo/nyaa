@@ -9,6 +9,7 @@ LEAVE_JOIN_CONFIG     = "config\\leave_join.json"                      # contain
 REACTION_ROLES_CONFIG = "config\\reaction_roles.json"                  # contains data for reaction roles
 RSS_CONFIG            = "config\\rss.json"                             # contains data for rss feed 
 DATABASE_PATH         = "config\\main.db"
+DATABASE_IMAGES_PATH         = "config\\images.db"
 ########################################################################
 ####################### sauce command url files ########################
 ########################################################################
