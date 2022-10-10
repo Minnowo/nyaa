@@ -1,17 +1,15 @@
 
-import traceback
-import sys
-import base64
 import discord
 import random
 from discord.errors import HTTPException
 
 from discord.ext import commands
-from discord.ext.commands.context import Context 
 import discord.ext.commands.errors
 
 from .. import util
 from .. import constants
+from .. import n_database as db
+from .. import config
 
 from . import (
     BaseNyaaCog
@@ -25,6 +23,7 @@ class ServerUtil(BaseNyaaCog):
     def __init__(self, bot) -> None:
         BaseNyaaCog.__init__(self, bot)
         self.logger = self.COG_Server_Util_LOGGER
+        self.MISC_DB_INSTANCE = db.MiscDB.get_instance()
 
 
 
@@ -55,7 +54,7 @@ class ServerUtil(BaseNyaaCog):
 
 
 
-    @commands.command(name='random', aliases=["rand", "rnd"])
+    @commands.command(name='random', aliases=["rand", "rnd", 'rng'])
     async def random_(self, ctx, a : str, b : str): 
         
         a = util.parse_int(a, None)
@@ -160,3 +159,88 @@ class ServerUtil(BaseNyaaCog):
 
         await ctx.send(embed=embed)
 
+
+
+
+    # add user to trusted list for debugging 
+    @commands.command(name='trust')
+    async def _trust(self, ctx, member : str):
+
+        if not self.MISC_DB_INSTANCE.is_user_trusted(ctx.author.id):
+
+            return 
+
+        id = util.get_mention_id_from_string(member)
+
+        if id is None:
+            return await self.send_message_wrapped(ctx, "Invalid ID or @")
+
+        try:
+            
+            member = await self.bot.fetch_user(id)
+
+        except HTTPException as e:
+            
+            self.logger.error(e)
+            
+            return await self.send_message_wrapped(ctx, "There was an error making the request")
+
+        except (discord.errors.NotFound, discord.ext.commands.errors.MemberNotFound):
+
+            return await self.send_message_wrapped(ctx, "Could not find the user </3")
+
+        if member.bot:
+
+            return await self.send_message_wrapped(ctx, "This user is a bot")
+
+        self.MISC_DB_INSTANCE.add_trusted_user(member.name, member.id)
+        
+        self.logger.info(f"User {ctx.author.name} with ID {ctx.author.id} has trusted {id}")
+
+        await self.send_message_wrapped(ctx, f"{member.name} has been trusted")
+
+
+    @commands.command(name='untrust')
+    async def _untrust(self, ctx, member : str):
+
+        if not self.MISC_DB_INSTANCE.is_user_trusted(ctx.author.id):
+
+            return 
+
+        id = util.get_mention_id_from_string(member)
+
+        if config.get(('bot'), "dev_user_id", -1) == id:
+
+            self.logger.info(f"User {ctx.author.name} with ID {ctx.author.id} has tried to untrust you.")
+
+            return await self._untrust(ctx, str(ctx.author.id))
+
+
+        if id is None:
+            return await self.send_message_wrapped(ctx, "Invalid ID or @")
+
+        
+        self.MISC_DB_INSTANCE.remove_trusted_user(id)
+        
+        self.logger.info(f"User {ctx.author.name} with ID {ctx.author.id} has removed trust from {id}")
+
+        await self.send_message_wrapped(ctx, f"user {id} has been untrusted")
+
+
+    
+    @commands.command(name='trusted')
+    async def _untrust(self, ctx):
+        
+        if not self.MISC_DB_INSTANCE.is_user_trusted(ctx.author.id):
+
+            return 
+
+        self.logger.info(f"User {ctx.author.name} with ID {ctx.author.id} has requested the trusted list")
+        self.logger.info("Trusted Users:")
+        self.logger.info("====================================")
+
+        for trusted in self.MISC_DB_INSTANCE.get_all_trusted():
+
+            self.logger.info(f"[{trusted['user_id']}] [  {trusted['username']}")
+
+        self.logger.info("====================================")

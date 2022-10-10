@@ -1,4 +1,5 @@
 
+import discord
 from discord.ext import commands
 
 from .. import n_database as db
@@ -22,7 +23,8 @@ class ImageCommands(BaseNyaaCog):
     def __init__(self, bot):
         BaseNyaaCog.__init__(self, bot)
         self.logger = self.IMAGE_COMMANDS_LOGGER
-        self.IMAGE_TABLE_INST = db.MediaUrlDB.get_instance()
+        self.MEDIADB_INSTANCE = db.MediaUrlDB.get_instance()
+        self.MISCDB_INSTANCE = db.MiscDB.get_instance() 
         self.last_image = {"image_id":-1, "category_id" : -1}
 
 
@@ -46,7 +48,7 @@ class ImageCommands(BaseNyaaCog):
 
             if not self.image_cache_nsfw[category_id]:
                 
-                self.image_cache_nsfw[category_id].extend(image["image_url"] for image in self.IMAGE_TABLE_INST.get_images_with_rating(category_id, constants.IMAGE_CACHE_SIZE, True))
+                self.image_cache_nsfw[category_id].extend({ "id" : image['image_id'], "url" : image["image_url"], "s" : image["is_nsfw"]  } for image in self.MEDIADB_INSTANCE.get_images_with_rating(category_id, constants.IMAGE_CACHE_SIZE, True))
 
             if not self.image_cache_nsfw[category_id]:
 
@@ -61,7 +63,7 @@ class ImageCommands(BaseNyaaCog):
 
         if not self.image_cache_sfw[category_id]:
             
-            self.image_cache_sfw[category_id].extend(image["image_url"] for image in self.IMAGE_TABLE_INST.get_images_with_rating(category_id, constants.IMAGE_CACHE_SIZE, False))
+            self.image_cache_sfw[category_id].extend({ "id" : image['image_id'], "url" : image["image_url"], "s" : image["is_nsfw"] } for image in self.MEDIADB_INSTANCE.get_images_with_rating(category_id, constants.IMAGE_CACHE_SIZE, False))
 
         if not self.image_cache_sfw[category_id]:
 
@@ -69,7 +71,23 @@ class ImageCommands(BaseNyaaCog):
 
         return self.image_cache_sfw[category_id].pop()
 
-        
+    
+    async def send_image_embed(self, ctx, image):
+
+
+        sfw = "SFW" if image['s'] == 0 else "NSFW"
+
+        embed = discord.Embed(color = constants.EMBED_COLOR)
+        embed.set_image(url = image['url'])
+        embed.set_footer(text = f"Rating: {sfw} \nImage ID: {image['id']}")
+
+        try:
+            
+            await ctx.send(embed=embed)
+
+        except discord.HTTPException as e:
+
+            self.logger.error(e)
 
         
 
@@ -80,9 +98,11 @@ class ImageCommands(BaseNyaaCog):
         requested_type is the content type prefered 
         """
         
+        self.logger.debug(f"user has requested {key} with type {requested_type}")
+
         isNSFW = ctx.channel.is_nsfw()
 
-        if requested_type and requested_type.startswith("s"):
+        if requested_type and requested_type.lower().startswith("s"):
                 
             isNSFW = False
 
@@ -96,6 +116,29 @@ class ImageCommands(BaseNyaaCog):
 
             await self.send_message_wrapped(ctx, "Could not find image")
 
+
+
+        
+    @commands.command(name = "setr")
+    async def _set_rating(self, ctx, image_id : int, rating : str):
+
+        if not self.MISCDB_INSTANCE.is_user_trusted(ctx.author.id):
+            return 
+
+        rating = rating.lower() 
+
+        if not rating.startswith('s') or rating.startswith('n'):
+
+            return await self.send_message_wrapped(ctx, "Specify SFW or NSFW")
+
+        is_nsfw = rating.startswith('n')
+
+        self.MEDIADB_INSTANCE.update_image_sfw_type(image_id, is_nsfw)
+
+        if is_nsfw:
+            await self.send_message_wrapped(ctx, "Image has been updated with NSFW rating")
+        else:
+            await self.send_message_wrapped(ctx, "Image has been updated with SFW rating")
 
     # module commands go here,
     # since its not possible to register commands in a cog without using the decorator,

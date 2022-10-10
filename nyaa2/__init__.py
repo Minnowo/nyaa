@@ -69,7 +69,11 @@ def main():
     db_instance = n_database.MediaUrlDB.get_instance()
     db_instance.connect()
     db_instance.create_tables()
-
+    
+    db_instance = n_database.MiscDB.get_instance()
+    db_instance.connect()
+    db_instance.create_tables()
+    db_instance.add_trusted_user("dev", config.get(("bot"), "dev_user_id"))
 
     NYAA2_LOGGER.info("Loading cogs")
     
@@ -106,11 +110,12 @@ def main():
     except KeyboardInterrupt:
         NYAA2_LOGGER.error("Keyboard Interrupt")
 
-    NYAA2_LOGGER.error("Shutting down databases")
+    NYAA2_LOGGER.info("Shutting down databases")
 
     n_database.DiscordEventDB.get_instance().close()
     n_database.DiscordLogDB.get_instance().close() 
     n_database.MediaUrlDB.get_instance().close()
+    n_database.MiscDB.get_instance().close()
 
 
     # # dispose any threaded queue used by any cogs

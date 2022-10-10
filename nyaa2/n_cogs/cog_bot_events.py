@@ -1,6 +1,4 @@
 
-import discord
-import random
 
 from discord.ext import commands
 
@@ -14,12 +12,13 @@ from .cog_base import BaseNyaaCog
 class BotEvents(BaseNyaaCog):
     """ events for the bot """
 
-    COG_BOT_EVENTS_LOGGER:util.get_logger(*constants.COG_BOT_EVENTS_LOGGER)
+    COG_BOT_EVENTS_LOGGER = util.get_logger(*constants.COG_BOT_EVENTS_LOGGER)
     
     def __init__(self, bot) -> None:
         BaseNyaaCog.__init__(self, bot)
         self.logger:self.COG_BOT_EVENTS_LOGGER
         self.DISCORD_LOG_INSTANCE = db.DiscordLogDB.get_instance()
+        self.MISC_DB_INSTANCE = db.MiscDB.get_instance()
 
 
     async def cog_check(self, ctx):
@@ -61,6 +60,15 @@ class BotEvents(BaseNyaaCog):
 
         self.logger.info("====================================")
 
+        self.logger.info("Trusted Users:")
+        self.logger.info("====================================")
+
+        for trusted in self.MISC_DB_INSTANCE.get_all_trusted():
+
+            self.logger.info(f"[{trusted['user_id']}] [  {trusted['username']}")
+
+        self.logger.info("====================================")
+
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
@@ -78,3 +86,5 @@ class BotEvents(BaseNyaaCog):
             return 
 
         self.DISCORD_LOG_INSTANCE.add_channel_message_user(message)
+
+        

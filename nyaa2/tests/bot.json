@@ -1,0 +1,9 @@
+{
+    "_" : "this is what a sample bot.json config should look like",
+    
+    "token": "put your bot token here",
+    "prefix": "put your prefix here",
+
+    "__" : "put your discord user id here if you want to add trusted users via the command",
+    "dev_user_id" : 11212
+}

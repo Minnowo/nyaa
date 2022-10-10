@@ -17,13 +17,14 @@ RSS_CONFIG            = f"{CONFIG_JSON_DIR}rss.json"                            
 DATABASE_PATH         = f"{CONFIG_DB_DIR}main.db"
 DATABASE_IMAGES_PATH  = f"{CONFIG_DB_DIR}images.db"
 DATABASE_LOG_PATH     = f"{CONFIG_DB_DIR}logs.db"
+DATABASE_MISC_PATH    = f"{CONFIG_DB_DIR}misc.db"
 
-NYAA2_BASE_LOGGER     = ("[Main] Nyaa2 Base", f"{CONFIG_LOGS_DIR}Nyaa2.log", logging.INFO)
-COG_BASE_LOGGER       = ("[Cog] Base", f"{CONFIG_LOGS_DIR}CogBaseLogger.log", logging.INFO)
-COG_BOT_EVENTS_LOGGER = ("[Cog] Bot Events", f"{CONFIG_LOGS_DIR}CogBotEvents.log", logging.INFO)
+NYAA2_BASE_LOGGER      = ("[Main] Nyaa2 Base", f"{CONFIG_LOGS_DIR}Nyaa2.log", logging.INFO)
+COG_BASE_LOGGER        = ("[Cog] Base", f"{CONFIG_LOGS_DIR}CogBaseLogger.log", logging.INFO)
+COG_BOT_EVENTS_LOGGER  = ("[Cog] Bot Events", f"{CONFIG_LOGS_DIR}CogBotEvents.log", logging.INFO)
 COG_SERVER_UTIL_LOGGER = ("[Cog] Server Util", f"{CONFIG_LOGS_DIR}CogServerUtil.log", logging.INFO)
-IMAGE_COMMANDS_LOGGER = ("[Cog] Image Commands", f"{CONFIG_LOGS_DIR}CogImageCommands.log", logging.INFO)
-DB_BASE_LOGGER = ("[DB] Image Commands", f"{CONFIG_LOGS_DIR}DbBaseLogger.log", logging.INFO)
+IMAGE_COMMANDS_LOGGER  = ("[Cog] Image Commands", f"{CONFIG_LOGS_DIR}CogImageCommands.log", logging.DEBUG)
+DB_BASE_LOGGER         = ("[DB] Image Commands", f"{CONFIG_LOGS_DIR}DbBaseLogger.log", logging.INFO)
 
 EMBED_COLOR = 0xBCD0F7                                                 # default embed color
 EMBED_USER_LEFT_COLOR = 0xED152E                                       # color used for user leave embed
@@ -68,7 +69,66 @@ bcolors = Namespace(
 
 IMAGE_CACHE_SIZE = 25
 
-HELP_MESSAGE = "actual help message coming soon"
+HELP_MESSAGE = """```
+--~ Nyaa2 Help ~--
+
+I can't believe you actually got the help message :flushed:
+
+Aliases to commands will be put in [] and arguments in () and ? for optional arguments
+
+--~ Server Util ~-- 
+
+- getuser   (ID/Mention) [getmember] [user] [member] [fetchuser]
+- clear     (?MsgCount)  [delete] [purge]
+- random    (Min) (Max)  [rand] [rnd] [rng]
+- invite                 [getinvite]
+- getserver (?ServerID)  [server] [fetchserver] [guild] [getguild]
+
+- leave_join_message        ('leave'/'join') [ljm]
+- remove_leave_join_message ('leave'/'join') [rljm]
+
+
+--~ Images ~-- 
+
+sfw channels get sfw images and 18+ channels get nsfw (hopefully)
+
+If you get a "Could not find image" response, there is most likely no sfw/nsfw images 
+
+- astolfo    (?sfw/nsfw)
+- appleworm  (?sfw/nsfw) [worm]
+- bondage    (?sfw/nsfw) [bdsm]
+- cutegirls  (?sfw/nsfw) [girl]
+- feet       (?sfw/nsfw)
+- femboy     (?sfw/nsfw) [trap]
+- fubuki     (?sfw/nsfw)
+- gura       (?sfw/nsfw)
+- hutao      (?sfw/nsfw)
+- kemonomimi (?sfw/nsfw) [kemo] [neko]
+- mori       (?sfw/nsfw) [cali]
+- navel      (?sfw/nsfw) [stomach]
+- okayu      (?sfw/nsfw)
+- panties    (?sfw/nsfw) [pantsu]
+- pekora     (?sfw/nsfw) [peko]
+- rushia     (?sfw/nsfw)
+- suisei     (?sfw/nsfw) [sui]
+- thighs     (?sfw/nsfw) [thigh]
+- witch      (?sfw/nsfw)
+- nyaa       (?sfw/nsfw) [nya] [nyaaa]...
+- ranni      (?sfw/nsfw)
+- laplus     (?sfw/nsfw) [la+]
+- subaru     (?sfw/nsfw) 
+- baelz      (?sfw/nsfw) [hakos] [hakosbaelz] [bae]
+
+
+--~ Trusted ~--
+
+Commands for trusted users 
+
+- setr    (ImgID) (Rating)
+- trust   (ID/Mention)
+- untrust (ID/Mention)
+
+```"""
 
 
 IMAGE_CATEGORY_MAP = {

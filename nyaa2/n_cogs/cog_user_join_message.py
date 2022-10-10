@@ -1,13 +1,9 @@
-
-import traceback
 import sys
 import discord
 import datetime
 import os 
-from discord import permissions
 
 from discord.ext import commands
-from discord.ext.commands.context import Context
 
 from .. import util
 from .. import constants

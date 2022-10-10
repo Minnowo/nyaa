@@ -87,7 +87,7 @@ class MediaUrlDB(DB):
 
         is_nsfw = 1 if is_nsfw else 0
         
-        self.cursor.execute("UPDATE tbl_image SET is_nsfw = ? WHERE image_id = ?", (is_nsfw, image_id))
+        self.cursor.execute("UPDATE OR IGNORE tbl_image SET is_nsfw = ? WHERE image_id = ?", (is_nsfw, image_id))
 
     def get_image(self, category_id):
 
