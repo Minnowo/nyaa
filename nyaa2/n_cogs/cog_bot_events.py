@@ -14,11 +14,12 @@ from .cog_base import BaseNyaaCog
 class BotEvents(BaseNyaaCog):
     """ events for the bot """
 
-    COG_BOT_EVENTS_LOGGER = util.get_logger(*constants.COG_BOT_EVENTS_LOGGER)
+    COG_BOT_EVENTS_LOGGER:util.get_logger(*constants.COG_BOT_EVENTS_LOGGER)
     
     def __init__(self, bot) -> None:
         BaseNyaaCog.__init__(self, bot)
-        self.logger = self.COG_BOT_EVENTS_LOGGER
+        self.logger:self.COG_BOT_EVENTS_LOGGER
+        self.DISCORD_LOG_INSTANCE = db.DiscordLogDB.get_instance()
 
 
     async def cog_check(self, ctx):
@@ -54,9 +55,26 @@ class BotEvents(BaseNyaaCog):
 
         for i in self.bot.guilds:
 
+            self.DISCORD_LOG_INSTANCE.add_server(i.id, i.name, i.owner.id, i.created_at)
+
             self.logger.info(f"[  {i.name}")
 
         self.logger.info("====================================")
 
 
+    @commands.Cog.listener()
+    async def on_guild_join(self, guild):
 
+        self.logger.info(f"Bot has joined guild {guild.name}")
+
+        self.DISCORD_LOG_INSTANCE.add_server(guild.id, guild.name, guild.owner.id, guild.created_at)
+
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        
+        if message.guild is None or \
+           message.author.bot:
+            return 
+
+        self.DISCORD_LOG_INSTANCE.add_channel_message_user(message)

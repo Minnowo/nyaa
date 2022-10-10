@@ -26,9 +26,7 @@ class LeaveJoinMessage(BaseNyaaCog):
     def __init__(self, bot) -> None:
         BaseNyaaCog.__init__(self, bot)
 
-        self.DB_SESSION = db.Discord_Tables.get_instance()
-        self.DB_SESSION.add_event(constants.MEMBER_LEAVE)
-        self.DB_SESSION.add_event(constants.MEMBER_JOIN)
+        self.DB_SESSION = db.DiscordEventDB.get_instance()
 
         self.MEMBER_JOIN_EVENT  = self.DB_SESSION.select_event_id_by_name(constants.MEMBER_JOIN)
         self.MEMBER_LEAVE_EVENT = self.DB_SESSION.select_event_id_by_name(constants.MEMBER_LEAVE)

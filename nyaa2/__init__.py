@@ -56,11 +56,17 @@ def main():
 
     NYAA2_LOGGER.info("Loading databases")
 
-    db_instance = n_database.Discord_Tables.get_instance()
+    db_instance = n_database.DiscordEventDB.get_instance()
+    db_instance.connect()
+    db_instance.create_tables()
+    db_instance.add_event(constants.MEMBER_LEAVE)
+    db_instance.add_event(constants.MEMBER_JOIN)
+
+    db_instance = n_database.DiscordLogDB.get_instance()
     db_instance.connect()
     db_instance.create_tables()
 
-    db_instance = n_database.Image_Tables.get_instance()
+    db_instance = n_database.MediaUrlDB.get_instance()
     db_instance.connect()
     db_instance.create_tables()
 
@@ -100,7 +106,13 @@ def main():
     except KeyboardInterrupt:
         NYAA2_LOGGER.error("Keyboard Interrupt")
 
-    NYAA2_LOGGER.error("Shutting down.")
+    NYAA2_LOGGER.error("Shutting down databases")
+
+    n_database.DiscordEventDB.get_instance().close()
+    n_database.DiscordLogDB.get_instance().close() 
+    n_database.MediaUrlDB.get_instance().close()
+
+
     # # dispose any threaded queue used by any cogs
     # for name, thread in threaded_queue.active_threads.items():
     #     print("ending thread:", name, end="", flush=True)

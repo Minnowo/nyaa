@@ -6,26 +6,26 @@ from .. import constants
 
 from .db import * 
 
-class Discord_Tables(DB):
+class DiscordEventDB(DB):
 
     __INSTANCE = None 
 
     @staticmethod 
     def get_instance():
         """ Static access method. """
-        if Discord_Tables.__INSTANCE == None:
-            Discord_Tables()
+        if DiscordEventDB.__INSTANCE == None:
+            DiscordEventDB()
 
-        return Discord_Tables.__INSTANCE
+        return DiscordEventDB.__INSTANCE
 
     def __init__(self):
         """ Virtually private constructor. """
         
-        if Discord_Tables.__INSTANCE != None:
+        if DiscordEventDB.__INSTANCE != None:
             raise Exception("This class is a singleton!")
         
         DB.__init__(self, constants.DATABASE_PATH)
-        Discord_Tables.__INSTANCE = self
+        DiscordEventDB.__INSTANCE = self
 
 
     def create_tables(self):
@@ -70,14 +70,14 @@ class Discord_Tables(DB):
             PRIMARY KEY (server_channel_id, event_id)
         );""")
 
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_reaction_role" (
-            "reaction_role_id" INTEGER PRIMARY KEY NOT NULL,
-            "reaction_role_channel_id" INTEGER,
-            "reaction_role_role_id" INTEGER,
-            "reaction_role_message_id" INTEGER,
-            "reaction_role_emote" VARCHAR,
-            FOREIGN KEY(reaction_role_channel_id) REFERENCES tbl_channel(channel_id) ON DELETE CASCADE
-        );""")
+        # self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_reaction_role" (
+        #     "reaction_role_id" INTEGER PRIMARY KEY NOT NULL,
+        #     "reaction_role_channel_id" INTEGER,
+        #     "reaction_role_role_id" INTEGER,
+        #     "reaction_role_message_id" INTEGER,
+        #     "reaction_role_emote" VARCHAR,
+        #     FOREIGN KEY(reaction_role_channel_id) REFERENCES tbl_channel(channel_id) ON DELETE CASCADE
+        # );""")
 
         self.commit()
 
@@ -90,9 +90,7 @@ class Discord_Tables(DB):
         row = self.cursor.execute_select_one("SELECT server_id FROM tbl_server WHERE server_id=?", (server_id,))
 
         if row:
-
-            self.cursor.execute("UPDATE tbl_server SET server_name = ?, server_owner_id = ? WHERE server_id = ?", (server_name, server_owner_id, server_id))
-            return 
+            return -1
 
         if server_date_created :
 
@@ -107,23 +105,27 @@ class Discord_Tables(DB):
 
         self.cursor.execute("INSERT INTO tbl_server values (?, ?, ?, ?)", (server_id, server_name, server_date_created, server_owner_id))
 
+        return self.cursor.cursor.lastrowid
+
+    
 
     def add_channel(self, server_id : int, 
                     channel_id : int, 
                     channel_name : str,
                     channel_type : int):
         
-        row = self.cursor.execute_select_one("SELECT channel_id FROM tbl_channel WHERE channel_id = ?", (channel_id,))
+        row = self.cursor.execute_select_one("SELECT * FROM tbl_server_channel WHERE channel_id = ?", (channel_id,))
 
         if row:
 
             self.cursor.execute("UPDATE tbl_channel SET channel_name = ? WHERE channel_id = ?", (channel_name, channel_id))
-            
-        else:
+            return row['server_channel_id']
 
-            self.cursor.execute("INSERT INTO tbl_channel values (?, ?, ?)", (channel_id, channel_name, channel_type))
+        self.cursor.execute("INSERT INTO tbl_channel values (?, ?, ?)", (channel_id, channel_name, channel_type))
             
         self.cursor.execute("INSERT OR IGNORE INTO tbl_server_channel (server_id, channel_id) values (?, ?) ", (server_id, channel_id))
+
+        return self.cursor.cursor.lastrowid
 
 
 
@@ -161,13 +163,6 @@ class Discord_Tables(DB):
     def remove_channel_event_2(self, server_id : int, channel_id : int, event_id : int):
 
         self.cursor.execute("DELETE FROM tbl_server_channel_event WHERE server_channel_id IN (SELECT server_channel_id FROM tbl_server_channel WHERE channel_id = ? AND server_id = ?) AND event_id = ?", (channel_id, server_id, event_id))
-
-
-
-    def add_reaction_role(self, channel_id : int, role_id : int, message_id : int, emote : str):
-
-        self.cursor.execute("INSERT INTO tbl_reaction_role (reaction_role_channel_id, reaction_role_role_id, reaction_role_message_id, reaction_role_emote) values (?, ?, ?, ?)", (channel_id, role_id, message_id, emote))
-
 
 
     def select_event_by_name(self, event_name : str):

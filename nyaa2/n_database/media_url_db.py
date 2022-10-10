@@ -4,26 +4,26 @@ from .. import constants
 
 from .db import * 
 
-class Image_Tables(DB):
+class MediaUrlDB(DB):
 
     __INSTANCE = None 
 
     @staticmethod 
     def get_instance():
         """ Static access method. """
-        if Image_Tables.__INSTANCE == None:
-            Image_Tables()
+        if MediaUrlDB.__INSTANCE == None:
+            MediaUrlDB()
 
-        return Image_Tables.__INSTANCE
+        return MediaUrlDB.__INSTANCE
 
     def __init__(self):
         """ Virtually private constructor. """
         
-        if Image_Tables.__INSTANCE != None:
+        if MediaUrlDB.__INSTANCE != None:
             raise Exception("This class is a singleton!")
         
         DB.__init__(self, constants.DATABASE_IMAGES_PATH)
-        Image_Tables.__INSTANCE = self
+        MediaUrlDB.__INSTANCE = self
 
 
     def create_tables(self):
@@ -83,3 +83,26 @@ class Image_Tables(DB):
 
         return None 
 
+    def update_image_sfw_type(self, image_id, is_nsfw):
+
+        is_nsfw = 1 if is_nsfw else 0
+        
+        self.cursor.execute("UPDATE tbl_image SET is_nsfw = ? WHERE image_id = ?", (is_nsfw, image_id))
+
+    def get_image(self, category_id):
+
+        return self.cursor.execute_select_one("select * from tbl_image JOIN tbl_image_category USING(image_id) WHERE category_id = ? order by RANDOM();", (category_id,))
+
+
+    def get_images(self, category_id, count):
+
+        return self.cursor.execute_select_all("select * from tbl_image JOIN tbl_image_category USING(image_id) WHERE category_id = ? order by RANDOM() LIMIT ?", (category_id, count))
+
+
+    def get_images_with_rating(self, category_id, count, is_nsfw):
+
+        is_nsfw = 1 if is_nsfw else 0
+
+        return self.cursor.execute_select_all("select * from tbl_image JOIN tbl_image_category USING(image_id) WHERE category_id = ? AND is_nsfw = ? order by RANDOM() LIMIT ?", (category_id, is_nsfw, count))
+
+    

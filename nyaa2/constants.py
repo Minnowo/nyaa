@@ -16,6 +16,7 @@ RSS_CONFIG            = f"{CONFIG_JSON_DIR}rss.json"                            
 
 DATABASE_PATH         = f"{CONFIG_DB_DIR}main.db"
 DATABASE_IMAGES_PATH  = f"{CONFIG_DB_DIR}images.db"
+DATABASE_LOG_PATH     = f"{CONFIG_DB_DIR}logs.db"
 
 NYAA2_BASE_LOGGER     = ("[Main] Nyaa2 Base", f"{CONFIG_LOGS_DIR}Nyaa2.log", logging.INFO)
 COG_BASE_LOGGER       = ("[Cog] Base", f"{CONFIG_LOGS_DIR}CogBaseLogger.log", logging.INFO)
@@ -34,7 +35,6 @@ MEMBER_LEAVE = "leave"
 REACTION_CHANGED = "reaction_changed"
 MESSAGE_DELETED  = "message_deleted"
 
-JOKE_HELP = ["uwu", "owo", "*prrrr*", "nyaa~ ;3c", "*teehee*", "*prrrr*"]
 
 WINDOWS = (os.name == "nt")
 
@@ -66,4 +66,18 @@ bcolors = Namespace(
 
 
 
+IMAGE_CACHE_SIZE = 25
+
 HELP_MESSAGE = "actual help message coming soon"
+
+
+IMAGE_CATEGORY_MAP = {
+    'astolfo': 1, 
+    'appleworm': 2, 'bondage': 3, 'cutegirls': 4, 'feet': 5, 'femboy': 6, 'fubuki': 7,
+    'gura': 8, 'hutao': 9, 'kemonomimi': 10, 'mori': 11, 'navel': 12,
+    'okayu': 13, 'panties': 14, 'pekora': 15, 'rushia': 16, 'suisei': 17, 
+    'thighs': 18, 'witch': 19, 'nyaa': 20, 'ranni': 21, 
+    'laplus': 22, 'subaru': 23, 
+    'baelz': 24}
+
+JOKE_HELP = ["uwu", "owo", "*prrrr*", "nyaa~ ;3c", "*teehee*", "*prrrr*", HELP_MESSAGE]
