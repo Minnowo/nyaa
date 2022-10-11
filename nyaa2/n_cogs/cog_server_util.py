@@ -23,8 +23,6 @@ class ServerUtil(BaseNyaaCog):
     def __init__(self, bot) -> None:
         BaseNyaaCog.__init__(self, bot)
         self.logger = self.COG_Server_Util_LOGGER
-        self.MISC_DB_INSTANCE = db.MiscDB.get_instance()
-
 
 
     async def cog_command_error(self, ctx, error):
@@ -44,6 +42,10 @@ class ServerUtil(BaseNyaaCog):
     @commands.command(name='help')
     async def help_(self, ctx, *, search: str = None):
 
+        if self.MISC_DB_INSTANCE.is_user_trusted(ctx.author.id):
+
+            return await self.send_message_wrapped(ctx, constants.JOKE_HELP[-1])
+
         await self.send_message_wrapped(ctx, random.choice(constants.JOKE_HELP))
 
 
@@ -52,6 +54,14 @@ class ServerUtil(BaseNyaaCog):
     async def invite_(self, ctx): 
         await ctx.send(f"https://discord.com/oauth2/authorize?client_id={self.bot.user.id}&permissions=8&scope=bot")
 
+
+    # @commands.command(name='err')
+    # async def error_test(self, ctx): 
+
+    #     with self.MISC_DB_INSTANCE as cursor:
+
+    #         raise TypeError
+        
 
 
     @commands.command(name='random', aliases=["rand", "rnd", 'rng'])
@@ -104,7 +114,7 @@ class ServerUtil(BaseNyaaCog):
 
         except HTTPException as e:
             
-            self.logger.error(e)
+            self.logger.error(e, stack_info=True)
             
             return await self.send_message_wrapped(ctx, "There was an error making the request")
 
@@ -140,11 +150,14 @@ class ServerUtil(BaseNyaaCog):
             
                 guild = self.bot.get_guild(id)
             
-            except HTTPException:
+            except HTTPException as e:
                 
+                self.logger.error(e, stack_info=True)
+
                 return await self.send_message_wrapped(ctx, "There was an error making the request")
                 
             except (discord.errors.NotFound, discord.ext.commands.errors.GuildNotFound):
+
                 return await self.send_message_wrapped(ctx, "I'm not in this server </3")
 
         if not guild:
@@ -181,7 +194,7 @@ class ServerUtil(BaseNyaaCog):
 
         except HTTPException as e:
             
-            self.logger.error(e)
+            self.logger.error(e, stack_info=True)
             
             return await self.send_message_wrapped(ctx, "There was an error making the request")
 

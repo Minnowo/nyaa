@@ -2,20 +2,11 @@
 import sqlite3
 import threading
 
-from .. import util
-from .. import constants
-
-
-DB_BASE_LOGGER = util.get_logger(*constants.DB_BASE_LOGGER)
-
-
 def dict_factory (cursor, row):
     aDict = {}
     for iField, field in enumerate (cursor.description):
         aDict [field [0]] = row [iField]
     return aDict
-
-
 
 def get_connection(database_path : str, foreign_key_checks=True, check_same_thread=False, isolation_level=None):
     
@@ -26,7 +17,6 @@ def get_connection(database_path : str, foreign_key_checks=True, check_same_thre
         conn.execute('pragma foreign_keys = ON')
 
     return conn
-
 
 class LockableCursor:
 
@@ -48,8 +38,6 @@ class LockableCursor:
 
         except Exception as exception:
             
-            DB_BASE_LOGGER.error(exception, stack_info=True)
-
             raise exception
 
         finally:
@@ -66,8 +54,6 @@ class LockableCursor:
 
         except Exception as exception:
             
-            DB_BASE_LOGGER.error(exception, stack_info=True)
-
             raise exception
 
         finally:
@@ -81,8 +67,6 @@ class LockableCursor:
 
         except Exception as exception:
             
-            DB_BASE_LOGGER.error(exception, stack_info=True)
-
             raise exception
 
         finally:
@@ -109,22 +93,99 @@ class DB():
         self.cursor.close()
         self.connection.close()
 
-
     def __enter__(self):
 
         self.cursor.execute("BEGIN")
 
         return self.cursor
 
-
     def __exit__(self, exc_type, exc_val, exc_traceback):
 
         if exc_type:
             
-            DB_BASE_LOGGER.error(exc_val, exc_info=True)
-
             self.cursor.execute("ROLLBACK")
 
         else:
 
             self.cursor.execute("COMMIT")
+
+
+class MiscDB(DB):
+
+    __INSTANCE = None 
+
+    @staticmethod 
+    def get_instance():
+        """ Static access method. """
+        if MiscDB.__INSTANCE == None:
+            MiscDB()
+
+        return MiscDB.__INSTANCE
+
+    def __init__(self):
+        """ Virtually private constructor. """
+        
+        if MiscDB.__INSTANCE != None:
+            raise Exception("This class is a singleton!")
+        
+        DB.__init__(self, ".\\db.db")
+        MiscDB.__INSTANCE = self
+
+
+    def create_tables(self):
+        
+        if not self.connection:
+            self.connect()
+
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_trusted" (
+            "user_id" INTEGER PRIMARY KEY NOT NULL,
+            "username" VARCHAR
+        );""")
+
+        self.commit()
+
+        
+    def add_trusted_user(self, username, user_id):
+
+        self.cursor.execute("INSERT OR IGNORE INTO tbl_trusted VALUES (?, ?)", (user_id, username))
+
+
+    def remove_trusted_user(self, user_id):
+    
+        self.cursor.execute("DELETE FROM tbl_trusted WHERE user_id = ?", (user_id, ))
+
+    
+    def is_user_trusted(self, user_id):
+
+        row = self.cursor.execute_select_one("SELECT * FROM tbl_trusted WHERE user_id = ?", (user_id,))
+
+        if not row:
+
+            return False 
+
+        return True 
+
+    def get_all_trusted(self):
+
+        return self.cursor.execute_select_all("SELECT * FROM tbl_trusted")
+
+
+    def add_stuff(self):
+
+        with self as cursor:
+
+            for i in range(100000):
+
+                # cursor.execute("DELETE FROM tbl_trusted WHERE user_id = ?", (i,))
+                cursor.execute("INSERT INTO tbl_trusted VALUES (?, ?)", (i, str(i)))
+
+                print(cursor.cursor.lastrowid)
+
+
+if __name__ == "__main__":
+
+    instance = MiscDB.get_instance()
+    instance.connect()
+    instance.create_tables()
+
+    instance.add_stuff()

@@ -96,21 +96,17 @@ class DiscordLogDB(DB):
         self.commit()
 
 
-    def add_server(self, server_id : int, 
-                   server_name : str, 
-                   server_owner_id : int,
-                   server_date_created : typing.Union[int, datetime.datetime]):
+    def add_server(self, server_id : int, server_name : str, server_owner_id : int, server_date_created : typing.Union[int, datetime.datetime]):
 
         row = self.cursor.execute_select_one("SELECT server_id FROM tbl_server WHERE server_id=?", (server_id,))
 
         if row:
-            return -1 
 
-        if server_date_created :
+            return row['server_id']
 
-            if isinstance(server_date_created, datetime.datetime):
+        if server_date_created and isinstance(server_date_created, datetime.datetime):
 
-                server_date_created = int(server_date_created.timestamp())
+            server_date_created = int(server_date_created.timestamp())
         
         else:
 
@@ -123,9 +119,15 @@ class DiscordLogDB(DB):
 
 
 
-    def add_channel(self, server_id : int, 
-                    channel_id : int, 
-                    channel_name : str):
+    def add_channel(self, server_id : int, channel_id : int, channel_name : str):
+
+        with self as _:
+
+            return self.add_channel_raw(server_id, channel_id, channel_name)
+
+
+
+    def add_channel_raw(self, server_id : int, channel_id : int, channel_name : str):
         
         row = self.cursor.execute_select_one("SELECT * FROM tbl_server_channel WHERE channel_id = ?", (channel_id,))
 
@@ -143,8 +145,7 @@ class DiscordLogDB(DB):
         return self.cursor.cursor.lastrowid
 
 
-
-    def add_user(self, username : int, user_id : int = -1):
+    def add_user(self, username : int, user_id : int):
 
         row = self.cursor.execute_select_one("SELECT user_id FROM tbl_user WHERE user_id = ?", (user_id,))
 
@@ -157,7 +158,6 @@ class DiscordLogDB(DB):
         self.cursor.execute("INSERT INTO tbl_user values (?, ?)", (user_id, username))
 
         return self.cursor.cursor.lastrowid
-
 
 
     def add_channel_message_user(self, message):
@@ -173,18 +173,20 @@ class DiscordLogDB(DB):
         message_id = message.id
         message_content = message.content.encode()
 
-        self.add_user(username, user_id)
+        with self as cursor:
 
-        server_channel_id = self.add_channel(server_id, channel_id, channel_name)
+            self.add_user(username, user_id)
 
-        self.cursor.execute("INSERT INTO tbl_message VALUES (?, ?, ?)", (message_id, message_content, int(message.created_at.timestamp())))
+            server_channel_id = self.add_channel_raw(server_id, channel_id, channel_name)
 
-        self.cursor.execute("INSERT INTO tbl_user_message (user_id, message_id) VALUES (?, ?)", (user_id, message_id))
+            cursor.execute("INSERT INTO tbl_message VALUES (?, ?, ?)", (message_id, message_content, int(message.created_at.timestamp())))
 
-        user_msg_id = self.cursor.cursor.lastrowid
+            cursor.execute("INSERT INTO tbl_user_message (user_id, message_id) VALUES (?, ?)", (user_id, message_id))
 
-        self.cursor.execute("INSERT INTO tbl_server_channel_message VALUES (?, ?)", (server_channel_id, user_msg_id))
+            user_msg_id = cursor.cursor.lastrowid
 
-        for attachment in message.attachments:
+            cursor.execute("INSERT INTO tbl_server_channel_message VALUES (?, ?)", (server_channel_id, user_msg_id))
 
-            self.cursor.execute("INSERT INTO tbl_attachments (message_id, attachment_url, attachment_proxy_url) VALUES (?, ?, ?)", (message.id, attachment.url, attachment.proxy_url))
+            for attachment in message.attachments:
+
+                cursor.execute("INSERT INTO tbl_attachments (message_id, attachment_url, attachment_proxy_url) VALUES (?, ?, ?)", (message.id, attachment.url, attachment.proxy_url))

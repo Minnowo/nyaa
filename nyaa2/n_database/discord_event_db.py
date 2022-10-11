@@ -82,21 +82,17 @@ class DiscordEventDB(DB):
         self.commit()
 
 
-    def add_server(self, server_id : int, 
-                   server_name : str, 
-                   server_owner_id : int,
-                   server_date_created : typing.Union[int, datetime.datetime]):
+    def add_server(self, server_id : int, server_name : str, server_owner_id : int, server_date_created : typing.Union[int, datetime.datetime]):
 
         row = self.cursor.execute_select_one("SELECT server_id FROM tbl_server WHERE server_id=?", (server_id,))
 
         if row:
-            return -1
 
-        if server_date_created :
+            return row['server_id']
 
-            if isinstance(server_date_created, datetime.datetime):
+        if server_date_created and isinstance(server_date_created, datetime.datetime):
 
-                server_date_created = int(server_date_created.timestamp())
+            server_date_created = int(server_date_created.timestamp())
         
         else:
 
@@ -107,12 +103,17 @@ class DiscordEventDB(DB):
 
         return self.cursor.cursor.lastrowid
 
-    
 
-    def add_channel(self, server_id : int, 
-                    channel_id : int, 
-                    channel_name : str,
-                    channel_type : int):
+
+    def add_channel(self, server_id : int, channel_id : int, channel_name : str, channel_type : int):
+
+        with self as _:
+
+            self.add_channel_raw( server_id, channel_id, channel_name, channel_type)
+
+
+
+    def add_channel_raw(self, server_id : int, channel_id : int, channel_name : str, channel_type : int):
         
         row = self.cursor.execute_select_one("SELECT * FROM tbl_server_channel WHERE channel_id = ?", (channel_id,))
 

@@ -2,6 +2,7 @@
 import discord
 from discord.ext import commands
 
+from .. import n_database as db 
 from .. import constants
 from .. import util
 
@@ -15,6 +16,10 @@ class BaseNyaaCog(commands.Cog):
     def __init__(self, bot) -> None:
         self.bot = bot
         self.logger = self.COG_BASE_LOGGER
+        self.DISCORD_EVENT_DB_INSTANCE = db.DiscordEventDB.get_instance()
+        self.DISCORD_LOG_DB_INSTANCE   = db.DiscordLogDB.get_instance()
+        self.MEDIA_DB_INSTANCE         = db.MediaUrlDB.get_instance()
+        self.MISC_DB_INSTANCE          = db.MiscDB.get_instance()
 
     def shutdown(self) -> None:
         """ Perform cleanup """
@@ -27,7 +32,7 @@ class BaseNyaaCog(commands.Cog):
     async def cog_command_error(self, ctx, error):
         """A local error handler for all errors arising from commands in this cog."""
 
-        self.logger.error(error)
+        self.logger.error(error, exc_info=True)
 
 
     async def send_message_wrapped(self, ctx, *args, **kwargs):
@@ -38,7 +43,7 @@ class BaseNyaaCog(commands.Cog):
         
         except discord.HTTPException as e:
             
-            self.logger.error(e)
+            self.logger.error(e, exc_info=True)
 
 
     async def send_image_embed(self, ctx, url):
@@ -53,4 +58,4 @@ class BaseNyaaCog(commands.Cog):
 
         except discord.HTTPException as e:
 
-            self.logger.error(e)
+            self.logger.error(e, exc_info=True)

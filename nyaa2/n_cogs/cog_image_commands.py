@@ -23,9 +23,6 @@ class ImageCommands(BaseNyaaCog):
     def __init__(self, bot):
         BaseNyaaCog.__init__(self, bot)
         self.logger = self.IMAGE_COMMANDS_LOGGER
-        self.MEDIADB_INSTANCE = db.MediaUrlDB.get_instance()
-        self.MISCDB_INSTANCE = db.MiscDB.get_instance() 
-        self.last_image = {"image_id":-1, "category_id" : -1}
 
 
     async def cog_command_error(self, ctx, error):
@@ -48,7 +45,7 @@ class ImageCommands(BaseNyaaCog):
 
             if not self.image_cache_nsfw[category_id]:
                 
-                self.image_cache_nsfw[category_id].extend({ "id" : image['image_id'], "url" : image["image_url"], "s" : image["is_nsfw"]  } for image in self.MEDIADB_INSTANCE.get_images_with_rating(category_id, constants.IMAGE_CACHE_SIZE, True))
+                self.image_cache_nsfw[category_id].extend({ "id" : image['image_id'], "url" : image["image_url"], "s" : image["is_nsfw"]  } for image in self.MEDIA_DB_INSTANCE.get_images_with_rating(category_id, constants.IMAGE_CACHE_SIZE, True))
 
             if not self.image_cache_nsfw[category_id]:
 
@@ -63,7 +60,7 @@ class ImageCommands(BaseNyaaCog):
 
         if not self.image_cache_sfw[category_id]:
             
-            self.image_cache_sfw[category_id].extend({ "id" : image['image_id'], "url" : image["image_url"], "s" : image["is_nsfw"] } for image in self.MEDIADB_INSTANCE.get_images_with_rating(category_id, constants.IMAGE_CACHE_SIZE, False))
+            self.image_cache_sfw[category_id].extend({ "id" : image['image_id'], "url" : image["image_url"], "s" : image["is_nsfw"] } for image in self.MEDIA_DB_INSTANCE.get_images_with_rating(category_id, constants.IMAGE_CACHE_SIZE, False))
 
         if not self.image_cache_sfw[category_id]:
 
@@ -87,7 +84,7 @@ class ImageCommands(BaseNyaaCog):
 
         except discord.HTTPException as e:
 
-            self.logger.error(e)
+            self.logger.error(e, stack_info=True)
 
         
 
@@ -122,7 +119,7 @@ class ImageCommands(BaseNyaaCog):
     @commands.command(name = "setr")
     async def _set_rating(self, ctx, image_id : int, rating : str):
 
-        if not self.MISCDB_INSTANCE.is_user_trusted(ctx.author.id):
+        if not self.MISC_DB_INSTANCE.is_user_trusted(ctx.author.id):
             return 
 
         rating = rating.lower() 
@@ -133,11 +130,14 @@ class ImageCommands(BaseNyaaCog):
 
         is_nsfw = rating.startswith('n')
 
-        self.MEDIADB_INSTANCE.update_image_sfw_type(image_id, is_nsfw)
+        self.MEDIA_DB_INSTANCE.update_image_sfw_type(image_id, is_nsfw)
 
         if is_nsfw:
+            self.logger.info(f"User {ctx.author.name} with ID {ctx.author.id} has set image {image_id} with rating NSFW")
             await self.send_message_wrapped(ctx, "Image has been updated with NSFW rating")
+
         else:
+            self.logger.info(f"User {ctx.author.name} with ID {ctx.author.id} has set image {image_id} with rating SFW")
             await self.send_message_wrapped(ctx, "Image has been updated with SFW rating")
 
     # module commands go here,
