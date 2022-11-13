@@ -33,51 +33,53 @@ class DiscordEventDB(DB):
         if not self.connection:
             self.connect()
         
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_server" (
-            "server_id" INTEGER PRIMARY KEY NOT NULL,
-            "server_name" VARCHAR,
-            "server_date_created" INTEGER,
-            "server_owner_id" INTEGER
-        );
-        """)
+        with self:
+            
+            self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_server" (
+                "server_id" INTEGER PRIMARY KEY NOT NULL,
+                "server_name" VARCHAR,
+                "server_date_created" INTEGER,
+                "server_owner_id" INTEGER
+            );
+            """)
 
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_event" (
-            "event_id" INTEGER PRIMARY KEY NOT NULL,
-            "event_name" VARCHAR UNIQUE
-        );""")
+            self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_event" (
+                "event_id" INTEGER PRIMARY KEY NOT NULL,
+                "event_name" VARCHAR UNIQUE
+            );""")
 
-        # channel_type : 0 = text, 1 = voice
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_channel" (
-            "channel_id" INTEGER PRIMARY KEY NOT NULL,
-            "channel_name" VARCHAR,
-            "channel_type" INTEGER
-        );""")
+            # channel_type : 0 = text, 1 = voice
+            self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_channel" (
+                "channel_id" INTEGER PRIMARY KEY NOT NULL,
+                "channel_name" VARCHAR,
+                "channel_type" INTEGER
+            );""")
 
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_server_channel" (
-            "server_channel_id" INTEGER PRIMARY KEY NOT NULL,
-            "server_id" INTEGER,
-            "channel_id" INTEGER,
-            FOREIGN KEY(server_id) REFERENCES tbl_server(server_id) ON DELETE CASCADE,
-            FOREIGN KEY(channel_id) REFERENCES tbl_channel(channel_id) ON DELETE CASCADE,
-            UNIQUE (server_id, channel_id)
-        );""")
+            self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_server_channel" (
+                "server_channel_id" INTEGER PRIMARY KEY NOT NULL,
+                "server_id" INTEGER,
+                "channel_id" INTEGER,
+                FOREIGN KEY(server_id) REFERENCES tbl_server(server_id) ON DELETE CASCADE,
+                FOREIGN KEY(channel_id) REFERENCES tbl_channel(channel_id) ON DELETE CASCADE,
+                UNIQUE (server_id, channel_id)
+            );""")
 
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_server_channel_event" (
-            "server_channel_id" INTEGER,
-            "event_id" INTEGER,
-            FOREIGN KEY(server_channel_id) REFERENCES tbl_server_channel(server_channel_id) ON DELETE CASCADE,
-            FOREIGN KEY(event_id) REFERENCES tbl_event(event_id) ON DELETE CASCADE,
-            PRIMARY KEY (server_channel_id, event_id)
-        );""")
+            self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_server_channel_event" (
+                "server_channel_id" INTEGER,
+                "event_id" INTEGER,
+                FOREIGN KEY(server_channel_id) REFERENCES tbl_server_channel(server_channel_id) ON DELETE CASCADE,
+                FOREIGN KEY(event_id) REFERENCES tbl_event(event_id) ON DELETE CASCADE,
+                PRIMARY KEY (server_channel_id, event_id)
+            );""")
 
-        # self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_reaction_role" (
-        #     "reaction_role_id" INTEGER PRIMARY KEY NOT NULL,
-        #     "reaction_role_channel_id" INTEGER,
-        #     "reaction_role_role_id" INTEGER,
-        #     "reaction_role_message_id" INTEGER,
-        #     "reaction_role_emote" VARCHAR,
-        #     FOREIGN KEY(reaction_role_channel_id) REFERENCES tbl_channel(channel_id) ON DELETE CASCADE
-        # );""")
+            # self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_reaction_role" (
+            #     "reaction_role_id" INTEGER PRIMARY KEY NOT NULL,
+            #     "reaction_role_channel_id" INTEGER,
+            #     "reaction_role_role_id" INTEGER,
+            #     "reaction_role_message_id" INTEGER,
+            #     "reaction_role_emote" VARCHAR,
+            #     FOREIGN KEY(reaction_role_channel_id) REFERENCES tbl_channel(channel_id) ON DELETE CASCADE
+            # );""")
 
         self.commit()
 

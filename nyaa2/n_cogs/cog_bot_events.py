@@ -50,11 +50,21 @@ class BotEvents(BaseNyaaCog):
         self.logger.info("Servers:")
         self.logger.info("====================================")
 
-        for i in self.bot.guilds:
+        with self.DISCORD_LOG_DB_INSTANCE:
 
-            self.DISCORD_LOG_DB_INSTANCE.add_server(i.id, i.name, i.owner.id, i.created_at)
+            for i in self.bot.guilds:
 
-            self.logger.info(f"[  {i.name}")
+                if not i.owner:
+    
+                    self.DISCORD_LOG_DB_INSTANCE.add_server(i.id, i.name, -1, i.created_at)
+
+                    self.logger.warning(f"guild {i} has None type owner")
+
+                else:
+                    
+                    self.DISCORD_LOG_DB_INSTANCE.add_server(i.id, i.name, i.owner.id, i.created_at)
+
+                self.logger.info(f"[  {i.name}")
 
         self.logger.info("====================================")
 
@@ -83,6 +93,29 @@ class BotEvents(BaseNyaaCog):
            message.author.bot:
             return 
 
+        # if message.guild.id == 381952489655894016 and message.channel.id == 942174974754566204:
+            
+        #     with open(constants.URL_SAVE + "url.txt", "a") as writer:
+
+        #         for attachment in message.attachments:
+
+        #             writer.write(attachment.url + "\n")
+
+        #     with open(constants.URL_SAVE + "purl.txt", "a") as writer:
+
+        #         for attachment in message.attachments:
+
+        #             writer.write(attachment.proxy_url + "\n")
+
         self.DISCORD_LOG_DB_INSTANCE.add_channel_message_user(message)
 
+        
+    @commands.Cog.listener()
+    async def on_message_delete(self, message):
+        
+        if message.guild is None or \
+           message.author.bot:
+            return 
+
+        self.DISCORD_LOG_DB_INSTANCE.set_message_deleted(message.id)
         

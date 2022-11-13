@@ -31,26 +31,27 @@ class MediaUrlDB(DB):
         if not self.connection:
             self.connect()
         
+        with self:
 
-        # is_nsfw : 0 = false 1 = true 
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_image" (
-            "image_id" INTEGER PRIMARY KEY NOT NULL,
-            "image_url" VARCHAR,
-            "is_nsfw" INTEGER
-        );""")
+            # is_nsfw : 0 = false 1 = true 
+            self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_image" (
+                "image_id" INTEGER PRIMARY KEY NOT NULL,
+                "image_url" VARCHAR,
+                "is_nsfw" INTEGER
+            );""")
 
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_category" (
-            "category_id" INTEGER PRIMARY KEY NOT NULL,
-            "category_name" VARCHAR UNIQUE
-        );""")
+            self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_category" (
+                "category_id" INTEGER PRIMARY KEY NOT NULL,
+                "category_name" VARCHAR UNIQUE
+            );""")
 
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_image_category" (
-            "category_id" INTEGER,
-            "image_id" INTEGER,
-            FOREIGN KEY(category_id) REFERENCES tbl_category(category_id) ON DELETE CASCADE,
-            FOREIGN KEY(image_id) REFERENCES tbl_image(image_id) ON DELETE CASCADE,
-            PRIMARY KEY (category_id, image_id)
-        );""")
+            self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_image_category" (
+                "category_id" INTEGER,
+                "image_id" INTEGER,
+                FOREIGN KEY(category_id) REFERENCES tbl_category(category_id) ON DELETE CASCADE,
+                FOREIGN KEY(image_id) REFERENCES tbl_image(image_id) ON DELETE CASCADE,
+                PRIMARY KEY (category_id, image_id)
+            );""")
 
         self.commit()
 
@@ -105,4 +106,12 @@ class MediaUrlDB(DB):
 
         return self.cursor.execute_select_all("select * from tbl_image JOIN tbl_image_category USING(image_id) WHERE category_id = ? AND is_nsfw = ? order by RANDOM() LIMIT ?", (category_id, is_nsfw, count))
 
-    
+
+    def get_all_categories(self):
+
+        return self.cursor.execute_select_all("select * from tbl_category")
+
+
+    def remove_duplicate_url(self):
+
+        self.cursor.execute("DELETE FROM tbl_image WHERE rowid NOT IN (SELECT MIN(rowid) FROM tbl_image GROUP BY image_url)")

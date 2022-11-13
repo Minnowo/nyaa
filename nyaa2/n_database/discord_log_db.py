@@ -33,65 +33,68 @@ class DiscordLogDB(DB):
         if not self.connection:
             self.connect()
         
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_server" (
-            "server_id" INTEGER PRIMARY KEY NOT NULL,
-            "server_name" VARCHAR,
-            "server_date_created" INTEGER,
-            "server_owner_id" INTEGER
-        );
-        """)
+        with self:
 
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_message" (
-            "message_id" INTEGER PRIMARY KEY NOT NULL,
-            "message_content" BLOB,
-            "message_time" INTEGER
-        );""")
+            self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_server" (
+                "server_id" INTEGER PRIMARY KEY NOT NULL,
+                "server_name" VARCHAR,
+                "server_date_created" INTEGER,
+                "server_owner_id" INTEGER
+            );
+            """)
 
-        # channel_type : 0 = text, 1 = voice
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_channel" (
-            "channel_id" INTEGER PRIMARY KEY NOT NULL,
-            "channel_name" VARCHAR
-        );""")
+            self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_message" (
+                "message_id" INTEGER PRIMARY KEY NOT NULL,
+                "message_content" BLOB,
+                "message_time" INTEGER,
+                "is_deleted" INTEGER
+            );""")
 
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_user" (
-            "user_id" INTEGER PRIMARY KEY NOT NULL,
-            "username" VARCHAR
-        );""")
+            # channel_type : 0 = text, 1 = voice
+            self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_channel" (
+                "channel_id" INTEGER PRIMARY KEY NOT NULL,
+                "channel_name" VARCHAR
+            );""")
 
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_attachments" (
-            "attachment_id" INTEGER PRIMARY KEY NOT NULL,
-            "message_id" INTEGER,
-            "attachment_url" VARCHAR,
-            "attachment_proxy_url" VARCHAR,
-            FOREIGN KEY(message_id) REFERENCES tbl_message(message_id) ON DELETE CASCADE,
-            UNIQUE (attachment_id, message_id)
-        );""")
+            self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_user" (
+                "user_id" INTEGER PRIMARY KEY NOT NULL,
+                "username" VARCHAR
+            );""")
 
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_server_channel" (
-            "server_channel_id" INTEGER PRIMARY KEY NOT NULL,
-            "server_id" INTEGER,
-            "channel_id" INTEGER,
-            FOREIGN KEY(server_id) REFERENCES tbl_server(server_id) ON DELETE CASCADE,
-            FOREIGN KEY(channel_id) REFERENCES tbl_channel(channel_id) ON DELETE CASCADE,
-            UNIQUE (server_id, channel_id)
-        );""")
+            self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_attachments" (
+                "attachment_id" INTEGER PRIMARY KEY NOT NULL,
+                "message_id" INTEGER,
+                "attachment_url" VARCHAR,
+                "attachment_proxy_url" VARCHAR,
+                FOREIGN KEY(message_id) REFERENCES tbl_message(message_id) ON DELETE CASCADE,
+                UNIQUE (attachment_id, message_id)
+            );""")
 
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_user_message" (
-            "user_message_id" INTEGER PRIMARY KEY NOT NULL,
-            "user_id" INTEGER,
-            "message_id" INTEGER,
-            FOREIGN KEY(user_id) REFERENCES tbl_user(user_id) ON DELETE CASCADE,
-            FOREIGN KEY(message_id) REFERENCES tbl_message(message_id) ON DELETE CASCADE,
-            UNIQUE (user_id, message_id)
-        );""")
+            self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_server_channel" (
+                "server_channel_id" INTEGER PRIMARY KEY NOT NULL,
+                "server_id" INTEGER,
+                "channel_id" INTEGER,
+                FOREIGN KEY(server_id) REFERENCES tbl_server(server_id) ON DELETE CASCADE,
+                FOREIGN KEY(channel_id) REFERENCES tbl_channel(channel_id) ON DELETE CASCADE,
+                UNIQUE (server_id, channel_id)
+            );""")
 
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_server_channel_message" (
-            "server_channel_id" INTEGER,
-            "user_message_id" INTEGER,
-            FOREIGN KEY(server_channel_id) REFERENCES tbl_server_channel(server_channel_id) ON DELETE CASCADE,
-            FOREIGN KEY(user_message_id) REFERENCES tbl_user_message(user_message_id) ON DELETE CASCADE,
-            PRIMARY KEY (server_channel_id, user_message_id)
-        );""")
+            self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_user_message" (
+                "user_message_id" INTEGER PRIMARY KEY NOT NULL,
+                "user_id" INTEGER,
+                "message_id" INTEGER,
+                FOREIGN KEY(user_id) REFERENCES tbl_user(user_id) ON DELETE CASCADE,
+                FOREIGN KEY(message_id) REFERENCES tbl_message(message_id) ON DELETE CASCADE,
+                UNIQUE (user_id, message_id)
+            );""")
+
+            self.cursor.execute("""CREATE TABLE IF NOT EXISTS "tbl_server_channel_message" (
+                "server_channel_id" INTEGER,
+                "user_message_id" INTEGER,
+                FOREIGN KEY(server_channel_id) REFERENCES tbl_server_channel(server_channel_id) ON DELETE CASCADE,
+                FOREIGN KEY(user_message_id) REFERENCES tbl_user_message(user_message_id) ON DELETE CASCADE,
+                PRIMARY KEY (server_channel_id, user_message_id)
+            );""")
 
         self.commit()
 
@@ -179,7 +182,7 @@ class DiscordLogDB(DB):
 
             server_channel_id = self.add_channel_raw(server_id, channel_id, channel_name)
 
-            cursor.execute("INSERT INTO tbl_message VALUES (?, ?, ?)", (message_id, message_content, int(message.created_at.timestamp())))
+            cursor.execute("INSERT INTO tbl_message VALUES (?, ?, ?, 0)", (message_id, message_content, int(message.created_at.timestamp())))
 
             cursor.execute("INSERT INTO tbl_user_message (user_id, message_id) VALUES (?, ?)", (user_id, message_id))
 
@@ -190,3 +193,8 @@ class DiscordLogDB(DB):
             for attachment in message.attachments:
 
                 cursor.execute("INSERT INTO tbl_attachments (message_id, attachment_url, attachment_proxy_url) VALUES (?, ?, ?)", (message.id, attachment.url, attachment.proxy_url))
+
+
+    def set_message_deleted(self, message_id):
+
+        self.cursor.execute("UPDATE tbl_message SET is_deleted = ? WHERE message_id = ?", (1, message_id))

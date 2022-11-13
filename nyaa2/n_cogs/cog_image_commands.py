@@ -124,7 +124,7 @@ class ImageCommands(BaseNyaaCog):
 
         rating = rating.lower() 
 
-        if not rating.startswith('s') or rating.startswith('n'):
+        if not rating.startswith('s') and not rating.startswith('n'):
 
             return await self.send_message_wrapped(ctx, "Specify SFW or NSFW")
 
@@ -140,12 +140,74 @@ class ImageCommands(BaseNyaaCog):
             self.logger.info(f"User {ctx.author.name} with ID {ctx.author.id} has set image {image_id} with rating SFW")
             await self.send_message_wrapped(ctx, "Image has been updated with SFW rating")
 
+
+    @commands.command(name = "listc", aliases = ["listcat", "listcategory"])
+    async def _lsit(self, ctx):
+
+        if not self.MISC_DB_INSTANCE.is_user_trusted(ctx.author.id):
+            return 
+
+        self.logger.info(f"listing categories for {ctx.author}")
+
+        cats = [ c['category_name'] for c in self.MEDIA_DB_INSTANCE.get_all_categories()]
+
+        await self.send_message_wrapped(ctx, ", ".join(cats))
+
+    @commands.command(name = "addcat", aliases = ["add_category", "addcategory"])
+    async def _addc(self, ctx, category : str):
+
+        if not self.MISC_DB_INSTANCE.is_user_trusted(ctx.author.id):
+            return 
+
+        if not category or not constants.IS_ONLY_A_TO_Z.match(category):
+
+            return await self.send_message_wrapped(ctx, "category was not added")
+
+        self.logger.info(f"adding category {category}")
+
+        self.MEDIA_DB_INSTANCE.add_image_category(category.lower().strip())
+
+        await self.send_message_wrapped(ctx, "added category")
+
+
+    @commands.command(name = "add", aliases = ["add_image", "addimage"])
+    async def _add(self, ctx, category : str, sfw : str):
+
+        if not self.MISC_DB_INSTANCE.is_user_trusted(ctx.author.id):
+            return 
+
+        if not ctx.message.attachments:
+
+            return await self.send_message_wrapped(ctx, "attachments required")
+
+        cat_id = self.MEDIA_DB_INSTANCE.select_category_id_by_name(category.lower().strip())
+        
+        if cat_id is None:
+
+            return await self.send_message_wrapped(ctx, "invalid category")
+
+        is_sfw = sfw.startswith("s")
+
+        with self.MEDIA_DB_INSTANCE as cursor:
+
+            for attachment in ctx.message.attachments:
+
+                self.logger.info(f"adding image {attachment.url} to category {category}")
+
+                self.MEDIA_DB_INSTANCE.add_image(cat_id, attachment.url, not is_sfw)
+
+        await self.send_message_wrapped(ctx, "added image links to category")
+
     # module commands go here,
     # since its not possible to register commands in a cog without using the decorator,
     # i'm just adding the command for each module myself instead of in a config somewhere else
 
     # currently just forcin o content for each command cause i don't have time to sort through it all
     
+    @commands.command(name = "mio", aliases = ["ookami_mio"])
+    async def _ookami_mio(self, ctx, sfw : str = None):
+        await self.image_embed(ctx, 'ookami_mio', sfw)
+
     @commands.command(name = "baelz", aliases = ["hakos", "hakosbaelz", "bae"])
     async def _bae(self, ctx, sfw : str = None):
         await self.image_embed(ctx, 'baelz', sfw)

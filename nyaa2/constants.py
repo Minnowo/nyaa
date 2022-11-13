@@ -26,6 +26,8 @@ COG_SERVER_UTIL_LOGGER = ("[Cog] Server Util", f"{CONFIG_LOGS_DIR}CogServerUtil.
 IMAGE_COMMANDS_LOGGER  = ("[Cog] Image Commands", f"{CONFIG_LOGS_DIR}CogImageCommands.log", logging.DEBUG)
 DB_BASE_LOGGER         = ("[DB] Image Commands", f"{CONFIG_LOGS_DIR}DbBaseLogger.log", logging.INFO)
 
+URL_SAVE = f"{CONFIG_DIR}links.txt"
+
 EMBED_COLOR = 0xBCD0F7                                                 # default embed color
 EMBED_USER_LEFT_COLOR = 0xED152E                                       # color used for user leave embed
 EMBED_USER_JOIN_COLOR = 0x04c41a                                       # color used for user joined embed 
@@ -46,7 +48,7 @@ from re import compile
 PARSE_CHANNEL_MENTION = compile(r"\<\#(\d+)\>")
 PARSE_USER_MENTION    = compile(r"\<\@(\d+)\>")
 PARSE_ROLE_MENTION    = compile(r"\<\@\&(\d+)\>")
-
+IS_ONLY_A_TO_Z        = compile(r"^[a-zA-Z_]+$")
 MATCH_RE_DISCORD_LINK = compile(r"(?:https?://)(?:(?:cdn\.discordapp\.com)|(?:media\.discordapp\.net))/attachments/\d+/\d+/[^\s]+")
 
 
@@ -127,17 +129,14 @@ Commands for trusted users
 - setr    (ImgID) (Rating)
 - trust   (ID/Mention)
 - untrust (ID/Mention)
+- listc                  [listcat] [listcategory]
+- addcat (Category Name) [add_category] [addcategory]
+- add    (Category Name) (sfw/nsfw) (then attach images to add) [add_image] [addimage]
+
 
 ```"""
 
 
-IMAGE_CATEGORY_MAP = {
-    'astolfo': 1, 
-    'appleworm': 2, 'bondage': 3, 'cutegirls': 4, 'feet': 5, 'femboy': 6, 'fubuki': 7,
-    'gura': 8, 'hutao': 9, 'kemonomimi': 10, 'mori': 11, 'navel': 12,
-    'okayu': 13, 'panties': 14, 'pekora': 15, 'rushia': 16, 'suisei': 17, 
-    'thighs': 18, 'witch': 19, 'nyaa': 20, 'ranni': 21, 
-    'laplus': 22, 'subaru': 23, 
-    'baelz': 24}
+IMAGE_CATEGORY_MAP = {}
 
 JOKE_HELP = ["uwu", "owo", "*prrrr*", "nyaa~ ;3c", "*teehee*", "*prrrr*", HELP_MESSAGE]

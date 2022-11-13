@@ -75,6 +75,12 @@ def main():
     db_instance.create_tables()
     db_instance.add_trusted_user("dev", config.get(("bot"), "dev_user_id"))
 
+    cats = n_database.MediaUrlDB.get_instance().get_all_categories()
+
+    for ls in cats:
+
+        constants.IMAGE_CATEGORY_MAP[ls['category_name']] = int(ls['category_id'])
+
     NYAA2_LOGGER.info("Loading cogs")
     
     # read the list of cogs pre-defined in config.py

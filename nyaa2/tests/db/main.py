@@ -174,12 +174,15 @@ class MiscDB(DB):
 
         with self as cursor:
 
-            for i in range(100000):
+            # for i in range(10):
 
                 # cursor.execute("DELETE FROM tbl_trusted WHERE user_id = ?", (i,))
-                cursor.execute("INSERT INTO tbl_trusted VALUES (?, ?)", (i, str(i)))
+                # cursor.execute("INSERT INTO tbl_trusted VALUES (?, ?)", (10+i, "sex"))
+                # cursor.execute("UPDATE tbl_trusted SET username = 'sex' WHERE user_id = ?", (i,))
 
-                print(cursor.cursor.lastrowid)
+                # print(cursor.cursor.lastrowid)
+
+            cursor.execute("DELETE FROM tbl_trusted WHERE rowid NOT IN (SELECT MIN(rowid) FROM tbl_trusted GROUP BY username)")
 
 
 if __name__ == "__main__":
