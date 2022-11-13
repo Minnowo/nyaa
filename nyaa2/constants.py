@@ -120,7 +120,9 @@ If you get a "Could not find image" response, there is most likely no sfw/nsfw i
 - laplus     (?sfw/nsfw) [la+]
 - subaru     (?sfw/nsfw) 
 - baelz      (?sfw/nsfw) [hakos] [hakosbaelz] [bae]
+- towa       (?sfw/nsfw)
 
+- imid (id) [imbyid]
 
 --~ Trusted ~--
 

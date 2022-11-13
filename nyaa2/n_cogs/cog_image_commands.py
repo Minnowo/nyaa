@@ -109,8 +109,11 @@ class ImageCommands(BaseNyaaCog):
             
             await self.send_image_embed(ctx, image)
 
-        else:
+        elif isNSFW:
+            
+            await self.image_embed(ctx, key, "sfw")
 
+        else:
             await self.send_message_wrapped(ctx, "Could not find image")
 
 
@@ -159,13 +162,23 @@ class ImageCommands(BaseNyaaCog):
         if not self.MISC_DB_INSTANCE.is_user_trusted(ctx.author.id):
             return 
 
+        category = category.lower().strip()
+
         if not category or not constants.IS_ONLY_A_TO_Z.match(category):
 
             return await self.send_message_wrapped(ctx, "category was not added")
 
         self.logger.info(f"adding category {category}")
 
-        self.MEDIA_DB_INSTANCE.add_image_category(category.lower().strip())
+        self.MEDIA_DB_INSTANCE.add_image_category(category)
+
+        cat_id = self.MEDIA_DB_INSTANCE.select_category_id_by_name(category)
+
+        if cat_id is None:
+
+            return await self.send_message_wrapped(ctx, "category was not added due to error")
+
+        constants.IMAGE_CATEGORY_MAP[category] = cat_id
 
         await self.send_message_wrapped(ctx, "added category")
 
@@ -198,12 +211,47 @@ class ImageCommands(BaseNyaaCog):
 
         await self.send_message_wrapped(ctx, "added image links to category")
 
+
+    @commands.command(name = "imid", aliases = ["imbyid", "imagebyid"])
+    async def _imbyid(self, ctx, id : str):
+
+        id = util.parse_int(id, None)
+
+        if id is None:
+
+            return await self.send_message_wrapped(ctx, "could not parse id")
+
+        im = self.MEDIA_DB_INSTANCE.get_image_by_id(id)
+
+        if im is None:
+
+            return await self.send_message_wrapped(ctx, "image does not exist")
+
+        await self.send_image_embed(ctx, { "id" : im['image_id'], "url" : im["image_url"], "s" : im["is_nsfw"] })
+
+    @commands.command(name = "imcat", aliases = ["imbycat"])
+    async def _imbycat(self, ctx, category : str, stf : str = None):
+
+        cat_id = self.MEDIA_DB_INSTANCE.select_category_id_by_name(category.lower().strip())
+
+        if cat_id is None:
+
+            return await self.send_message_wrapped(ctx, "cannot find category")
+
+        await self.image_embed(ctx, category, stf)
+
+
+
     # module commands go here,
     # since its not possible to register commands in a cog without using the decorator,
     # i'm just adding the command for each module myself instead of in a config somewhere else
 
     # currently just forcin o content for each command cause i don't have time to sort through it all
     
+    @commands.command(name = "towa", aliases = ["tokayami_towa"])
+    async def _tow(self, ctx, sfw : str = None):
+        await self.image_embed(ctx, 'towa', sfw)
+
     @commands.command(name = "mio", aliases = ["ookami_mio"])
     async def _ookami_mio(self, ctx, sfw : str = None):
         await self.image_embed(ctx, 'ookami_mio', sfw)

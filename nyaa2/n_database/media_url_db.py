@@ -115,3 +115,7 @@ class MediaUrlDB(DB):
     def remove_duplicate_url(self):
 
         self.cursor.execute("DELETE FROM tbl_image WHERE rowid NOT IN (SELECT MIN(rowid) FROM tbl_image GROUP BY image_url)")
+
+    def get_image_by_id(self, image_id):
+
+        return self.cursor.execute_select_one("select * from tbl_image WHERE image_id = ?", (image_id,))
