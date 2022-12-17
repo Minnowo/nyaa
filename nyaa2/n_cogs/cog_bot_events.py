@@ -12,11 +12,8 @@ from .cog_base import BaseNyaaCog
 class BotEvents(BaseNyaaCog):
     """ events for the bot """
 
-    COG_BOT_EVENTS_LOGGER = util.get_logger(*constants.COG_BOT_EVENTS_LOGGER)
-    
     def __init__(self, bot) -> None:
         BaseNyaaCog.__init__(self, bot)
-        self.logger:self.COG_BOT_EVENTS_LOGGER
 
 
     async def cog_check(self, ctx):

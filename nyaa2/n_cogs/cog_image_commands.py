@@ -1,4 +1,4 @@
-
+import random
 import discord
 from discord.ext import commands
 
@@ -11,8 +11,6 @@ from .cog_base import BaseNyaaCog
 # cog responsible for handling image commands 
 class ImageCommands(BaseNyaaCog):
 
-    IMAGE_COMMANDS_LOGGER = util.get_logger(*constants.IMAGE_COMMANDS_LOGGER)
-
     image_cache_sfw = { 
 
     }
@@ -22,7 +20,6 @@ class ImageCommands(BaseNyaaCog):
 
     def __init__(self, bot):
         BaseNyaaCog.__init__(self, bot)
-        self.logger = self.IMAGE_COMMANDS_LOGGER
 
 
     async def cog_command_error(self, ctx, error):
@@ -348,3 +345,50 @@ class ImageCommands(BaseNyaaCog):
     async def _witch(self, ctx, sfw : str = None):
         await self.image_embed(ctx, 'witch', sfw)
 
+
+
+
+
+    AWOO_SET = [
+        "https://cdn.discordapp.com/attachments/620023299107192853/1053461781068136468/awoo1.jpg",
+        "https://cdn.discordapp.com/attachments/620023299107192853/1053461795567845376/awoo2.gif",
+        "https://cdn.discordapp.com/attachments/620023299107192853/1053461801448243220/awoo3.png",
+        "https://cdn.discordapp.com/attachments/620023299107192853/1053461804459765820/awoo4.png",
+        "https://cdn.discordapp.com/attachments/620023299107192853/1053461808150761492/awoo5.png",
+        "https://cdn.discordapp.com/attachments/620023299107192853/1053461818565202050/awoo6.png",
+        ]
+
+
+    DIF_BETWEEN_LOLI_AND_SMOL = "https://cdn.discordapp.com/attachments/620023299107192853/1053462159650209812/the_difference_between_loli_and_petite.png"
+
+
+    SHONDO_CRYING = 'https://cdn.discordapp.com/attachments/620023299107192853/1053458565815337060/cry.webm'
+
+
+
+    @commands.command(name='cry')
+    async def _cry(self, ctx):
+
+        await self.send_message_wrapped(ctx, self.SHONDO_CRYING)
+
+    @commands.command(name='awoo')
+    async def _awoo(self, ctx):
+
+        awoo = {
+            's' : 0,
+            'id' : 'awoo',
+            'url' : random.choice(self.AWOO_SET)
+        }
+
+        await self.send_image_embed(ctx, awoo)
+
+    @commands.command(name='loli', aliases=['cunny','child'])
+    async def _loli(self, ctx):
+
+        awoo = {
+            's' : 0,
+            'id' : 'no cute and funny >>:((',
+            'url' : self.DIF_BETWEEN_LOLI_AND_SMOL
+        }
+
+        await self.send_image_embed(ctx, awoo)

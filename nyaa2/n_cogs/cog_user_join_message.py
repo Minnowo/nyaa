@@ -30,17 +30,17 @@ class LeaveJoinMessage(BaseNyaaCog):
         self.event_map[constants.MEMBER_LEAVE] = self.MEMBER_LEAVE_EVENT
 
 
-        self.config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), constants.LEAVE_JOIN_CONFIG)
-
-
     async def cog_check(self, ctx):
 
         if not ctx.guild:
             raise commands.NoPrivateMessage
 
-        if not ctx.author.permissions_in(ctx.channel).manage_channels:
+        perms = ctx.channel.permissions_for(ctx.author)
+
+        if perms is None or not perms.manage_channels:
+    
             raise commands.MissingPermissions(["manage_channels"])
-            
+
         return True
 
 
@@ -72,12 +72,17 @@ class LeaveJoinMessage(BaseNyaaCog):
             if not channel:
                 continue
 
+            self.logger.info(f"User {member.id} has joined {guild.id}")
+
             date_time = member.joined_at or str(datetime.datetime.now().strftime("%x")) + " " + str(datetime.datetime.now().strftime("%X"))
             
             leave_join_embed = discord.Embed(color = constants.EMBED_USER_JOIN_COLOR)
-            leave_join_embed.set_author(name = f"**{member.name} Joined The Server**", icon_url = member.avatar_url_as(size=128))
+            leave_join_embed.set_author(name = f"**{member.name} Joined The Server**", icon_url = member.avatar)
             leave_join_embed.set_footer(text = f"Joined at: {date_time}")
-            leave_join_embed.add_field(name =f"**User:**", value = 'Mention: <@{}> \nName: {} \nId: {}'.format(member.id, member, member.id), inline=False)
+            leave_join_embed.add_field(name =f"**User:**", 
+                                       value = f'Mention: <@{member.id}>\n' + \
+                                               f'Name: {member} \n' + \
+                                               f'Id: {member.id}', inline=False)
             leave_join_embed.add_field(name =f"**Account Created On:**", value = member.created_at, inline=False)
 
             await self.send_message_wrapped(channel, embed=leave_join_embed)
@@ -95,12 +100,17 @@ class LeaveJoinMessage(BaseNyaaCog):
             if not channel:
                 continue
 
+            self.logger.info(f"User {member.id} has joined {guild.id}")
+
             date_time = member.joined_at or str(datetime.datetime.now().strftime("%x")) + " " + str(datetime.datetime.now().strftime("%X"))
             
             leave_join_embed = discord.Embed(color = constants.EMBED_USER_LEFT_COLOR)
-            leave_join_embed.set_author(name = f"**{member.name} Left The Server**", icon_url = member.avatar_url_as(size=128))
+            leave_join_embed.set_author(name = f"**{member.name} Left The Server**", icon_url = member.avatar)
             leave_join_embed.set_footer(text = f"Joined at: {date_time}")                        
-            leave_join_embed.add_field(name =f"**User:**", value = 'Mention: <@{}> \nName: {} \nId: {}'.format(member.id, member, member.id), inline=False)
+            leave_join_embed.add_field(name =f"**User:**", 
+                                       value = f'Mention: <@{member.id}>\n' + \
+                                               f'Name: {member} \n' + \
+                                               f'Id: {member.id}', inline=False)
             leave_join_embed.add_field(name =f"**Account Created On:**", value = member.created_at, inline=False)
 
             await self.send_message_wrapped(channel, embed=leave_join_embed)
@@ -136,6 +146,8 @@ class LeaveJoinMessage(BaseNyaaCog):
             
             return await self.send_message_wrapped(f"I cannot find channel with given id: {id}")
 
+        self.logger.info(f"Subscribed to {ctx.guild.id}")
+
         self.DB_SESSION.add_channel(ctx.guild.id, channel.id, channel.name, 0)
         self.DB_SESSION.add_channel_event(channel.id, self.event_map[event.lower()])
         self.DB_SESSION.commit()
@@ -168,6 +180,8 @@ class LeaveJoinMessage(BaseNyaaCog):
         if not channel:
 
             return await self.send_message_wrapped(ctx, f"I cannot find channel with given id: {id}")
+
+        self.logger.info(f"Unsubscribed to {ctx.guild.id}")
 
         self.DB_SESSION.remove_channel_event_2(ctx.guild.id, channel.id, self.event_map[event.lower()])
 

@@ -50,6 +50,8 @@ def main():
     bot = commands.Bot(command_prefix = config.get(("bot"), "prefix"), intents=discord.Intents.all())
     bot.remove_command('help') # remove help command ;3c
 
+    loop = asyncio.get_event_loop()
+
     # make bot instance global through the config 
     config.set(("bot"), "instance", bot)
 
@@ -97,7 +99,7 @@ def main():
                 instance = cog_class(bot)
 
                 # register instance with the bot
-                bot.add_cog(instance)
+                asyncio.ensure_future(bot.add_cog(instance))
 
                 # add to loaded cogs 
                 config.set(("bot", "loaded_cogs"), i, instance)
@@ -111,8 +113,9 @@ def main():
 
     try:
         # run main event loop 
-        loop = asyncio.get_event_loop()
+        # await bot.start(config.get(("bot"), "token"))
         loop.run_until_complete(bot.start(config.get(("bot"), "token")))
+
     except KeyboardInterrupt:
         NYAA2_LOGGER.error("Keyboard Interrupt")
 

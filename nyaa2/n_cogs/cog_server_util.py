@@ -18,11 +18,8 @@ from . import (
 class ServerUtil(BaseNyaaCog):
     """ server utility functions """
 
-    COG_Server_Util_LOGGER = util.get_logger(*constants.COG_SERVER_UTIL_LOGGER)
-
     def __init__(self, bot) -> None:
         BaseNyaaCog.__init__(self, bot)
-        self.logger = self.COG_Server_Util_LOGGER
 
 
     async def cog_command_error(self, ctx, error):
@@ -89,7 +86,13 @@ class ServerUtil(BaseNyaaCog):
             
             return await self.send_message_wrapped(ctx, "can't purge dms, sorry </3")
 
-        if ctx.author.permissions_in(ctx.channel).manage_messages:
+        perms = ctx.channel.permissions_for(ctx.author)
+
+        if perms is None:
+    
+            return await self.send_message_wrapped(ctx, "Could not detect any permissions for given channel")
+
+        if perms.manage_messages:
             
             return await ctx.channel.purge(limit = amount + 1)
 
@@ -123,9 +126,13 @@ class ServerUtil(BaseNyaaCog):
             return await self.send_message_wrapped(ctx, "Could not find the user </3")
 
         embed = discord.Embed(color = constants.EMBED_COLOR)
-        embed.set_author(name = f"{member.name}#{member.discriminator}", icon_url = member.avatar_url_as(size=128))
-        embed.set_thumbnail(url=member.avatar_url_as(size=128))
-        embed.add_field(name =f"**User:**", value = 'Mention: <@{}> \nName: {} \nId: {}'.format(member.id, member, member.id), inline=False)
+        embed.set_author(name = f"{member.name}#{member.discriminator}", icon_url = member.avatar)
+        embed.set_thumbnail(url=member.avatar)
+        embed.add_field(name =f"**User:**", 
+                        value = f'Mention: <@{member.id}>\n' + \
+                                f'Name: {member} \n' + \
+                                f'Id: {member.id}', inline=False)
+                                
         embed.add_field(name =f"**Account Created On:**", value = member.created_at, inline=False)
 
         await ctx.send(embed=embed)
@@ -165,9 +172,16 @@ class ServerUtil(BaseNyaaCog):
             return await self.send_message_wrapped(ctx, "I'm not in this server ;w;")
 
         embed = discord.Embed(color = constants.EMBED_COLOR)
-        embed.set_author(name = f"{guild.name}", icon_url = guild.icon_url)
-        embed.set_thumbnail(url=guild.icon_url)
-        embed.add_field(name =f"**Server:**", value = 'Name: {} \nMember Count: {} \nChannel Count: {} \n Owner Id: {}\n Id: {}'.format(guild.name, guild.member_count,len(guild.channels),guild.owner_id, guild.id), inline=False)
+        embed.set_author(name = f"{guild.name}", icon_url = guild.icon)
+        embed.set_thumbnail(url=guild.icon)
+        embed.add_field(name =f"**Server:**", 
+                        value = f'Name: {guild.name} \n' + \
+                                f'Owner ID: {guild.owner_id}\n' + \
+                                f'Server ID: {guild.id}\n' + \
+                                f'Member Count: {guild.member_count} \n' + \
+                                f'Channel Count: {len(guild.channels)} \n' + \
+                                f'Filesize Limit: {util.size_suffix(guild.filesize_limit)} \n', inline=False)
+
         embed.add_field(name =f"**Created On:**", value = guild.created_at, inline=False)
 
         await ctx.send(embed=embed)
@@ -242,7 +256,7 @@ class ServerUtil(BaseNyaaCog):
 
     
     @commands.command(name='trusted')
-    async def _untrust(self, ctx):
+    async def _trusted(self, ctx):
         
         if not self.MISC_DB_INSTANCE.is_user_trusted(ctx.author.id):
 
