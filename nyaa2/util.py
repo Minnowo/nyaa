@@ -4,6 +4,8 @@ import sys
 import requests
 import logging 
 import math 
+import datetime
+import subprocess
 from . import constants
 
 
@@ -198,3 +200,57 @@ def size_suffix(value: int, decimals: int = 1):
         adjusted_size /= 1024
 
     return f'{adjusted_size:.{decimals}f} {constants.SIZE_SUFFIXES[mag]}'
+
+
+
+
+def get_temp_filename(dir: str, starting_with: str, extension: str):
+
+    fail_after = 100
+    fail = 0
+
+    while True:
+
+        name = os.path.join(dir, f"{starting_with}{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S_%f')}.{extension}")
+
+        if not os.path.isfile(name):
+            return name
+
+        fail += 1
+
+        if fail > fail_after:
+            raise OSError(f"could not make temppath starting with {starting_with} and ending with {extension} after trying {fail} times")
+
+
+
+
+def subprocess_communicate(process: subprocess.Popen, timeout: int = 10) -> tuple:
+
+    while True:
+
+        try:
+
+            return process.communicate(timeout=timeout)
+
+        except subprocess.TimeoutExpired:
+
+            pass
+
+
+def run_program(args: list):
+
+    return subprocess_communicate(
+        subprocess.Popen(args, bufsize=10**5,
+                         stdin=subprocess.PIPE,
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE))
+
+
+def remove_file(path : str) -> bool:
+    """    Deletes the given file.    """
+    try:
+        os.unlink(path)
+        return True 
+    except OSError:
+        pass
+    return False 

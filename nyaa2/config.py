@@ -8,11 +8,11 @@ from . import constants
 
 
 _config = {
-    "bot" : {                        # contains information about the bot: bot instance, token, prefix 
-        "cogs" : [
-                  "n_cogs",   
-                  ],
-        "loaded_cogs" : { # contains cog instances 
+    "bot": {                        # contains information about the bot: bot instance, token, prefix 
+        "cogs": [
+            "n_cogs",   
+        ],
+        "loaded_cogs": {  # contains cog instances 
 
         }
     }
@@ -23,7 +23,8 @@ _default_configs = [
     constants.BOT_CONFIG,
 ]
 
-def load(files=None, sub=None, strict=False, fmt="json", *, conf = _config):
+
+def load(files=None, sub=None, strict=False, fmt="json", *, conf=_config):
     """Load JSON configuration files"""
 
     if isinstance(files, str):
@@ -46,7 +47,7 @@ def load(files=None, sub=None, strict=False, fmt="json", *, conf = _config):
             print("Could not parse '%s': %s", path, exc)
             if strict:
                 sys.exit(2)
-                
+
         else:
             if not conf:
                 if sub:
@@ -56,10 +57,10 @@ def load(files=None, sub=None, strict=False, fmt="json", *, conf = _config):
 
                     util.combine_dict(conf[sub], confdict)
                     continue
-                
+
                 conf.update(confdict)
                 continue
-            
+
             if sub:
                 if sub not in conf:
                     conf[sub] = confdict
@@ -70,7 +71,8 @@ def load(files=None, sub=None, strict=False, fmt="json", *, conf = _config):
 
             util.combine_dict(conf, confdict)
 
-def save(path, sub = None, *, conf = _config):
+
+def save(path, sub=None, *, conf=_config):
 
     util.create_directory_from_file_name(path)
 
@@ -79,10 +81,11 @@ def save(path, sub = None, *, conf = _config):
             for i in sub:
                 conf = conf[i]
 
-        except:pass 
+        except:
+            pass 
 
     with open(path, "w") as f:
-        json.dump(util.replace_set_list(conf), f, indent = 3)
+        json.dump(util.replace_set_list(conf), f, indent=3)
 
 
 def clear():
@@ -90,25 +93,25 @@ def clear():
     _config.clear()
 
 
-def get(path : tuple, key : str, default = None, *, conf = _config):
+def get(path: tuple, key: str, default=None, *, conf=_config):
     """Get the value of property 'key' or a default value"""
-    
+
     if isinstance(path, str):
         path = (path,)
 
     try:
         for p in path:
             conf = conf[p]
-        
+
         return conf[key]
 
-    except Exception :
+    except Exception:
         return default
 
 
 def set(path, key, value, *, conf=_config):
     """Set the value of property 'key' for this session"""
-        
+
     if isinstance(path, str):
         path = (path,)
 

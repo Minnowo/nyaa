@@ -12,9 +12,10 @@ if __name__ == "__main__":
     import nyaa2
 
     nyaa2.create_important_paths()
-    
+
     # loop = asyncio.get_event_loop()
-    
+
     # loop.run_until_complete(nyaa2.main())
     # sys.exit()
+
     sys.exit(nyaa2.main())

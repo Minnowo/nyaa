@@ -7,7 +7,7 @@ import os
 import asyncio
 
 from discord.ext import commands
-from discord.ext.commands import has_permissions
+# from discord.ext.commands import has_permissions
 
 from . import n_cogs
 from . import constants
@@ -24,7 +24,7 @@ def get_cog_classes(name):
 
     module = __import__(name, globals(), None, (), 1)
 
-    return [ cls for cls in module.__dict__.values() if hasattr(cls, "nyaa_cog") and not cls is n_cogs.cog_base.BaseNyaaCog ]
+    return [cls for cls in module.__dict__.values() if hasattr(cls, "nyaa_cog") and cls is not n_cogs.cog_base.BaseNyaaCog]
 
 
 def create_important_paths():
@@ -40,15 +40,15 @@ def create_important_paths():
 def main():
     NYAA2_LOGGER.info("Nyaa2 starting...")
 
-    os.system("") # enable console color on windows 
+    os.system("")  # enable console color on windows 
 
     NYAA2_LOGGER.info(f"Loading {constants.BOT_CONFIG}")
     config.load(constants.BOT_CONFIG, "bot", True)
 
 
     # get bot instance 
-    bot = commands.Bot(command_prefix = config.get(("bot"), "prefix"), intents=discord.Intents.all())
-    bot.remove_command('help') # remove help command ;3c
+    bot = commands.Bot(command_prefix=config.get(("bot"), "prefix"), intents=discord.Intents.all())
+    bot.remove_command('help')  # remove help command ;3c
 
     loop = asyncio.get_event_loop()
 
@@ -71,7 +71,7 @@ def main():
     db_instance = n_database.MediaUrlDB.get_instance()
     db_instance.connect()
     db_instance.create_tables()
-    
+
     db_instance = n_database.MiscDB.get_instance()
     db_instance.connect()
     db_instance.create_tables()
@@ -84,7 +84,7 @@ def main():
         constants.IMAGE_CATEGORY_MAP[ls['category_name']] = int(ls['category_id'])
 
     NYAA2_LOGGER.info("Loading cogs")
-    
+
     # read the list of cogs pre-defined in config.py
     for i in config.get(("bot"), "cogs"):
 
@@ -107,7 +107,7 @@ def main():
             except Exception as e:
 
                 NYAA2_LOGGER.error(e)
-    
+
 
     NYAA2_LOGGER.info("Running event loop")
 
@@ -118,6 +118,7 @@ def main():
 
     except KeyboardInterrupt:
         NYAA2_LOGGER.error("Keyboard Interrupt")
+        asyncio.ensure_future(bot.close())
 
     NYAA2_LOGGER.info("Shutting down databases")
 
@@ -125,17 +126,3 @@ def main():
     n_database.DiscordLogDB.get_instance().close() 
     n_database.MediaUrlDB.get_instance().close()
     n_database.MiscDB.get_instance().close()
-
-
-    # # dispose any threaded queue used by any cogs
-    # for name, thread in threaded_queue.active_threads.items():
-    #     print("ending thread:", name, end="", flush=True)
-    #     thread.cleanup()
-    #     print(constants.bcolors.OKGREEN + " Done." + constants.bcolors.ENDC)
-
-    # # delete any cog instances 
-    # loaded = config.get(("bot",), "loaded_cogs")
-    # for i in loaded:
-        
-    #     # call deconstructor for each cog
-    #     loaded[i].__del__()

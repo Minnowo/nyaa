@@ -6,8 +6,19 @@ CONFIG_DIR = f"{BASE}.nyaa\\"
 CONFIG_DB_DIR = f"{CONFIG_DIR}db\\" 
 CONFIG_JSON_DIR = f"{CONFIG_DIR}json\\" 
 CONFIG_LOGS_DIR = f"{CONFIG_DIR}logs\\" 
+GALLERY_DL_LOGS_DIR = f"{CONFIG_LOGS_DIR}gallerydl\\"
 
-DIRECTORIES = [ BASE, CONFIG_DIR, CONFIG_DB_DIR, CONFIG_JSON_DIR, CONFIG_LOGS_DIR ]
+MEDIA_DIR = f"{CONFIG_DIR}media\\" 
+GALLERY_DL_DIR = f"{MEDIA_DIR}gallerydl\\" 
+
+BIN_DIR = f"{CONFIG_DIR}bin\\" 
+GALLERY_DL = f"{BIN_DIR}gallery-dl.exe"
+YTDLP       = f"{BIN_DIR}yt-dlp.exe"
+
+DIRECTORIES = [ 
+    BASE, CONFIG_DIR, CONFIG_DB_DIR, CONFIG_JSON_DIR, 
+    CONFIG_LOGS_DIR, BIN_DIR, GALLERY_DL_DIR, GALLERY_DL_LOGS_DIR, MEDIA_DIR
+]
 
 BOT_CONFIG            = f"{CONFIG_JSON_DIR}bot.json"                             # bot information 
 
@@ -36,7 +47,7 @@ MESSAGE_DELETED  = "message_deleted"
 WINDOWS = (os.name == "nt")
 
 
-from re import compile 
+from re import compile, IGNORECASE
 
 # used for getting the channel id from a mention -> <#insert channel id here>
 PARSE_CHANNEL_MENTION = compile(r"\<\#(\d+)\>")
@@ -45,7 +56,8 @@ PARSE_ROLE_MENTION    = compile(r"\<\@\&(\d+)\>")
 IS_ONLY_A_TO_Z        = compile(r"^[a-zA-Z_]+$")
 MATCH_RE_DISCORD_LINK = compile(r"(?:https?://)(?:(?:cdn\.discordapp\.com)|(?:media\.discordapp\.net))/attachments/\d+/\d+/[^\s]+")
 
-
+PARSE_COMMAND = compile(r"^run\s*([^\s]+)(.+)?$", IGNORECASE)
+MATCH_GENERAL_URL = compile(r"(https?://[^\s\'\"]+)")
 
 from argparse import Namespace
 
