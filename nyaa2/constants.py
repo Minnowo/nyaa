@@ -43,6 +43,7 @@ MEMBER_LEAVE = "leave"
 REACTION_CHANGED = "reaction_changed"
 MESSAGE_DELETED  = "message_deleted"
 
+TEST_SERVER_ID = 620022879475597342
 
 WINDOWS = (os.name == "nt")
 

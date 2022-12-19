@@ -66,7 +66,7 @@ class ImageCommands(BaseNyaaCog):
         return self.image_cache_sfw[category_id].pop()
 
     
-    async def send_image_embed(self, ctx, image):
+    async def send_image_embed(self, ctx: commands.Context, image):
 
 
         sfw = "SFW" if image['s'] == 0 else "NSFW"
@@ -86,7 +86,7 @@ class ImageCommands(BaseNyaaCog):
         
 
     # handles sending content for sfw and nsfw channels
-    async def image_embed(self, ctx, key, requested_type):
+    async def image_embed(self, ctx: commands.Context, key, requested_type):
         """
         key is the module name
         requested_type is the content type prefered 
@@ -117,7 +117,7 @@ class ImageCommands(BaseNyaaCog):
 
         
     @commands.command(name = "setr")
-    async def _set_rating(self, ctx, image_id : int, rating : str):
+    async def _set_rating(self, ctx: commands.Context, image_id : int, rating : str):
 
         if not self.MISC_DB_INSTANCE.is_user_trusted(ctx.author.id):
             return 
@@ -142,7 +142,7 @@ class ImageCommands(BaseNyaaCog):
 
 
     @commands.command(name = "listc", aliases = ["listcat", "listcategory"])
-    async def _lsit(self, ctx):
+    async def _lsit(self, ctx: commands.Context):
 
         if not self.MISC_DB_INSTANCE.is_user_trusted(ctx.author.id):
             return 
@@ -154,7 +154,7 @@ class ImageCommands(BaseNyaaCog):
         await self.send_message_wrapped(ctx, ", ".join(cats))
 
     @commands.command(name = "addcat", aliases = ["add_category", "addcategory"])
-    async def _addc(self, ctx, category : str):
+    async def _addc(self, ctx: commands.Context, category : str):
 
         if not self.MISC_DB_INSTANCE.is_user_trusted(ctx.author.id):
             return 
@@ -181,7 +181,7 @@ class ImageCommands(BaseNyaaCog):
 
 
     @commands.command(name = "add", aliases = ["add_image", "addimage"])
-    async def _add(self, ctx, category : str, sfw : str):
+    async def _add(self, ctx: commands.Context, category : str, sfw : str):
 
         if not self.MISC_DB_INSTANCE.is_user_trusted(ctx.author.id):
             return 
@@ -210,7 +210,7 @@ class ImageCommands(BaseNyaaCog):
 
 
     @commands.command(name = "imid", aliases = ["imbyid", "imagebyid"])
-    async def _imbyid(self, ctx, id : str):
+    async def _imbyid(self, ctx: commands.Context, id : str):
 
         id = util.parse_int(id, None)
 
@@ -226,8 +226,9 @@ class ImageCommands(BaseNyaaCog):
 
         await self.send_image_embed(ctx, { "id" : im['image_id'], "url" : im["image_url"], "s" : im["is_nsfw"] })
 
-    @commands.command(name = "imcat", aliases = ["imbycat"])
-    async def _imbycat(self, ctx, category : str, stf : str = None):
+    @commands.hybrid_command(name = "imcat", aliases = ["imbycat"], description="Gets an image from the given category")
+    # @discord.app_commands.guilds(discord.Object(id=constants.TEST_SERVER_ID))
+    async def _imbycat(self, ctx: commands.Context, category : str, sfw_or_nsfw : str = None):
 
         cat_id = self.MEDIA_DB_INSTANCE.select_category_id_by_name(category.lower().strip())
 
@@ -235,7 +236,7 @@ class ImageCommands(BaseNyaaCog):
 
             return await self.send_message_wrapped(ctx, "cannot find category")
 
-        await self.image_embed(ctx, category, stf)
+        await self.image_embed(ctx, category, sfw_or_nsfw)
 
 
 
@@ -281,9 +282,10 @@ class ImageCommands(BaseNyaaCog):
     async def _bondage(self, ctx, sfw : str = None):
         await self.image_embed(ctx, 'bondage', sfw)
     
-    @commands.command(name='cutegirls', aliases=['girl'])
-    async def _cutegirls(self, ctx, sfw : str = None):
-        await self.image_embed(ctx, 'cutegirls', sfw)
+    @commands.hybrid_command(name='cutegirls', aliases=['girl'], description="Gets a picture of a cute anime girl")
+    # @discord.app_commands.guilds(discord.Object(id=constants.TEST_SERVER_ID))
+    async def _cutegirls(self, ctx, sfw_or_nsfw : str = None):
+        await self.image_embed(ctx, 'cutegirls', sfw_or_nsfw)
     
     @commands.command(name='feet', aliases=[])
     async def _feet(self, ctx, sfw : str = None):

@@ -1,6 +1,7 @@
 
 
 from discord.ext import commands
+import discord
 
 from .. import config
 # from .. import constants
@@ -103,3 +104,4 @@ class BotEvents(BaseNyaaCog):
             return 
 
         self.DISCORD_LOG_DB_INSTANCE.set_message_deleted(message.id)
+

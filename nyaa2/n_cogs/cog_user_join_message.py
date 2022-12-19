@@ -116,7 +116,8 @@ class LeaveJoinMessage(BaseNyaaCog):
             await self.send_message_wrapped(channel, embed=leave_join_embed)
 
 
-    @commands.command(name='leave_join_message', aliases=['ljm'])
+    @commands.hybrid_command(name='leave_join_message', aliases=['ljm'], description="Show a message in the given channel when a user triggers the given event (leave, join)")
+    # @discord.app_commands.guilds(discord.Object(id=constants.TEST_SERVER_ID))
     async def subscribe_(self, ctx, event : str = None, channel : str = None):
         
         if not event or event not in self.event_map:
@@ -156,7 +157,8 @@ class LeaveJoinMessage(BaseNyaaCog):
 
 
 
-    @commands.command(name='remove_leave_join_message', aliases=['rljm'])
+    @commands.hybrid_command(name='remove_leave_join_message', aliases=['rljm'], description="No longer show a message in the given channel when a user triggers the given event (leave, join)")
+    # @discord.app_commands.guilds(discord.Object(id=constants.TEST_SERVER_ID))
     async def unsubscribe_(self, ctx, event : str = None, channel : str = None):
         
         if not event or event not in self.event_map:

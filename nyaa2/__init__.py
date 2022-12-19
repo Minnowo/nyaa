@@ -36,6 +36,16 @@ def create_important_paths():
             util.create_directory(dir)
 
 
+class Bot(commands.Bot):
+
+    def __init__(self, command_prefix):
+        super().__init__(command_prefix, intents=discord.Intents.all())
+
+    async def setup_hook(self):
+        # await self.tree.sync(guild = discord.Object(id=620022879475597342))
+        await self.tree.sync()
+        NYAA2_LOGGER.info(f"Synced slash commands for {self.user}")
+
 
 def main():
     NYAA2_LOGGER.info("Nyaa2 starting...")
@@ -47,7 +57,7 @@ def main():
 
 
     # get bot instance 
-    bot = commands.Bot(command_prefix=config.get(("bot"), "prefix"), intents=discord.Intents.all())
+    bot = Bot(command_prefix=config.get(("bot"), "prefix"))
     bot.remove_command('help')  # remove help command ;3c
 
     loop = asyncio.get_event_loop()

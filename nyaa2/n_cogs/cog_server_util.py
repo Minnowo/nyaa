@@ -61,7 +61,8 @@ class ServerUtil(BaseNyaaCog):
         
 
 
-    @commands.command(name='random', aliases=["rand", "rnd", 'rng'])
+    @commands.hybrid_command(name='random', aliases=["rand", "rnd", 'rng'], description="Gets a number between x and y")
+    # @discord.app_commands.guilds(discord.Object(id=constants.TEST_SERVER_ID))
     async def random_(self, ctx, a : str, b : str): 
         
         a = util.parse_int(a, None)
@@ -79,7 +80,8 @@ class ServerUtil(BaseNyaaCog):
 
 
 
-    @commands.command(name='clear', aliases=["delete", "purge"])
+    @commands.hybrid_command(name='clear', aliases=["delete", "purge"], description="Deletes x number of messages")
+    # @discord.app_commands.guilds(discord.Object(id=constants.TEST_SERVER_ID))
     async def clear_(self, ctx, amount = 5): 
 
         if not ctx.guild:
@@ -100,7 +102,8 @@ class ServerUtil(BaseNyaaCog):
 
 
 
-    @commands.command(name='getuser', aliases=["getmember", "fetchuser", "user", "member"])
+    @commands.hybrid_command(name='getuser', aliases=["getmember", "fetchuser", "user", "member"], description="Get information about a user")
+    # @discord.app_commands.guilds(discord.Object(id=constants.TEST_SERVER_ID))
     async def getuser_(self, ctx, *, id : str = None): 
         
         if id is None:
@@ -139,7 +142,8 @@ class ServerUtil(BaseNyaaCog):
 
 
 
-    @commands.command(name='getserver', aliases=["server", "fetchserver", "guild", "getguild"])
+    @commands.hybrid_command(name='getserver', aliases=["server", "fetchserver", "guild", "getguild"], description="Get information about a server the bot is in")
+    # @discord.app_commands.guilds(discord.Object(id=constants.TEST_SERVER_ID))
     async def getguild_(self, ctx, *, id : discord.Guild = None): 
         
         if isinstance(id, str):
